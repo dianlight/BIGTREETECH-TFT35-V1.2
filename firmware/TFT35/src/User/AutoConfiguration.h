@@ -16,6 +16,9 @@
         #undef Z_MAX_POS
 
         #include STR(MARLIN2_HOME/Marlin/Configuration.h)
+
+        #define HAS_DRIVER(T) ENABLED(T)   // BOGUS Value. All sub step driver configuration are fake
+        #include STR(MARLIN2_HOME/Marlin/Configuration_adv.h)
 //        #include STR(MARLIN2_HOME/Marlin/src/inc/MarlinConfig.h)
         #undef MAX
         #undef MIN
@@ -35,7 +38,7 @@
             #warning "ONBOARD_SD_SUPPORT Enabled but Marling Config without SDSUPPORT" 
         #endif
         #ifdef ONBOARD_SD_SUPPORT
-            #undef AUTO_REPORT_SD_STATUS
+            #undef M27_AUTOREPORT
             #ifdef AUTO_REPORT_SD_STATUS
                 #define M27_AUTOREPORT         // Disable the M27 polling if you enable enable Marlin AUTO_REPORT_SD_STATUS
             #endif
