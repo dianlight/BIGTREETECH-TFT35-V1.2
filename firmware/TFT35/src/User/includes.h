@@ -1,6 +1,9 @@
 #ifndef _INCLUDES_H_
 #define _INCLUDES_H_
 
+#include "configuration.h"
+#include "autoconfiguration.h"
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>

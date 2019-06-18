@@ -6,6 +6,8 @@
 #include "coordinate.h"
 #include "ff.h"
 #include "configuration.h"
+#include "autoconfiguration.h"
+
 
 #define BREAK_POINT_FILE		"0:Printing.sys"
 

@@ -4,6 +4,8 @@
 #include "stdint.h"
 #include "stdbool.h"
 #include "configuration.h"
+#include "autoconfiguration.h"
+
 
 typedef enum
 {
