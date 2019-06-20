@@ -3,6 +3,7 @@
 
 #include "includes.h"
 
+static const char connectmagic[]      = "FIRMWARE_NAME";
 static const char errormagic[]        = "Error:";
 static const char echomagic[]         = "echo:";
 static const char busymagic[]         = "busy:";

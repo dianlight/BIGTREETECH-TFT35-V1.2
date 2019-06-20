@@ -35,13 +35,27 @@
         #define DEFAULT_SPEED_MOVE      DEFAULT_TRAVEL_ACCELERATION  //Move default speed  mm/min
 
         #if !defined SDSUPPORT && defined ONBOARD_SD_SUPPORT
-            #warning "ONBOARD_SD_SUPPORT Enabled but Marling Config without SDSUPPORT" 
+            #error "ONBOARD_SD_SUPPORT Enabled but Marling config without SDSUPPORT" 
+        #elif defined SDSUPPORT && !defined ONBOARD_SD_SUPPORT
+            #define ONBOARD_SD_SUPPORT
         #endif
-        #ifdef ONBOARD_SD_SUPPORT
-            #undef M27_AUTOREPORT
-            #ifdef AUTO_REPORT_SD_STATUS
-                #define M27_AUTOREPORT         // Disable the M27 polling if you enable enable Marlin AUTO_REPORT_SD_STATUS
-            #endif
+
+        #if !defined AUTO_REPORT_SD_STATUS && defined M27_AUTOREPORT
+            #error "M27_AUTOREPORT Enabled but Marling config without AUTO_REPORT_SD_STATUS"
+        #elif defined AUTO_REPORT_SD_STATUS && !defined M27_AUTOREPORT
+            #define M27_AUTOREPORT
+        #endif
+
+        #if !defined AUTO_REPORT_TEMPERATURES && defined M155_AUTOREPORT
+            #error "M155_AUTOREPORT Enabled but Marling config without AUTO_REPORT_TEMPERATURES"
+        #elif defined AUTO_REPORT_TEMPERATURES && !defined M155_AUTOREPORT
+            #define M155_AUTOREPORT
+        #endif
+
+        #if !defined EXTENDED_CAPABILITIES_REPORT && defined RUNTIME_CONFIG_VALIDATE
+            #error "RUNTIME_CONFIG_VALIDATE Enabled but Marling config without EXTENDED_CAPABILITIES_REPORT"
+        #elif defined EXTENDED_CAPABILITIES_REPORT && !defined RUNTIME_CONFIG_VALIDATE
+            #define RUNTIME_CONFIG_VALIDATE
         #endif
 
     #endif

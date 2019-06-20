@@ -1,7 +1,9 @@
 #include "gcode.h"
 #include "includes.h"
+#include "logger.h"
 
 REQUEST_COMMAND_INFO requestCommandInfo;
+
 u32 timeout = 0;
 
 void requestInitTimeOut(void)
@@ -14,13 +16,14 @@ bool requestHasTimeOut(void)
   return ((OS_GetTime() - timeout) > 300);  //3s
 }
 
-static void resetRequestCommandInfo(void) 
+void resetRequestCommandInfo(void) 
 {
   memset(requestCommandInfo.cmd_rev_buf,0,CMD_MAX_REV);
   requestCommandInfo.inWaitResponse = true;
   requestCommandInfo.inResponse = false;
   requestCommandInfo.done = false;
   requestCommandInfo.inError = false;
+  requestCommandInfo.asyncCallback[0] = &async_M115_callback;
 }
 
 /*
@@ -159,4 +162,163 @@ bool request_M27(int seconds)
   sprintf(command, "M27 S%d\n",seconds);
   mustStoreCmd(command);
   return true;
+}
+
+/**
+ * Temperature auto report ( same as M105 )
+ **/
+bool request_M155(int seconds)
+{
+  char command[15];
+  sprintf(command, "M155 S%d\n",seconds);
+  mustStoreCmd(command);
+  return true;
+}
+
+/**
+ *   Read capabilities from M115 Printer
+ *  Es:
+FIRMWARE_NAME:Marlin bugfix-2.0.x (Github) SOURCE_CODE_URL:https://github.com/MarlinFirmware/Marlin PROTOCOL_VERSION:1.0 MACHINE_TYPE:CTC/SKR i3 Pro EXTRUDER_COUNT:1 UUID:cf2e20ab-6ece-48e1-84cc-be460024c3df
+Cap:SERIAL_XON_XOFF:0
+Cap:BINARY_FILE_TRANSFER:0
+Cap:EEPROM:1
+Cap:VOLUMETRIC:1
+Cap:AUTOREPORT_TEMP:1
+Cap:PROGRESS:0
+Cap:PRINT_JOB:1
+Cap:AUTOLEVEL:1
+Cap:Z_PROBE:1
+Cap:LEVELING_DATA:1
+Cap:BUILD_PERCENT:0
+Cap:SOFTWARE_POWER:0
+Cap:TOGGLE_LIGHTS:0
+Cap:CASE_LIGHT_BRIGHTNESS:0
+Cap:EMERGENCY_PARSER:0
+Cap:PROMPT_SUPPORT:0
+Cap:AUTOREPORT_SD_STATUS:1
+Cap:THERMAL_PROTECTION:1
+Cap:MOTION_MODES:0
+Cap:CHAMBER_TEMPERATURE:0
+ */
+static M115_CAP cap;
+
+M115_CAP *async_M115(void)
+{
+  if(cap.lastUpdateTime == 0){
+    resetRequestCommandInfo();
+    mustStoreCmd("M115\n");
+  } 
+  return &cap;
+}
+
+void async_M115_callback(char *buffer)
+{
+    if(strlen(buffer) < 30)
+    {
+      debugfixed(0,buffer);
+    } 
+    else if (strlen(buffer) < 60)
+    {
+      debugfixed(0,&buffer[strlen(buffer)-30]);
+    }
+    else
+    {
+      debugfixed(0,"%.30s",&buffer[strlen(buffer)-60]);
+      debugfixed(1,&buffer[strlen(buffer)-30]);
+    }
+    if(strstr(buffer,"EXTRUDER_COUNT:") != NULL){
+      char *ptr;
+      cap.EXTRUDER_COUNT = strtol(strstr(buffer,"EXTRUDER_COUNT:")+15, &ptr, 10);
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"UUID:") != NULL)  
+    {
+      strncpy(cap.UUID,strstr(buffer,"UUID:")+5,36); 
+      cap.lastUpdateTime = OS_GetTime();
+    } 
+    if(strstr(buffer,"AUTOREPORT_TEMP:") != NULL)   
+    {
+      cap.AUTOREPORT_TEMP = strstr(buffer,"AUTOREPORT_TEMP:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"PROGRESS:") != NULL)   
+    {
+      cap.PROGRESS = strstr(buffer,"PROGRESS:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"AUTOLEVEL:") != NULL)   
+    {
+      cap.AUTOLEVEL = strstr(buffer,"AUTOLEVEL:1") != NULL;
+    if(strstr(buffer,"Z_PROBE:") != NULL)   
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    {
+      cap.Z_PROBE = strstr(buffer,"Z_PROBE:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"PRINT_JOB:") != NULL)   
+    {
+      cap.PRINT_JOB = strstr(buffer,"PRINT_JOB:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"LEVELING_DATA:") != NULL)   
+    {
+      cap.LEVELING_DATA = strstr(buffer,"LEVELING_DATA:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"BUILD_PERCENT:") != NULL)   
+    {
+      cap.BUILD_PERCENT = strstr(buffer,"BUILD_PERCENT:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"VOLUMETRIC:") != NULL)   
+    {
+      cap.VOLUMETRIC = strstr(buffer,"VOLUMETRIC:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"SOFTWARE_POWER:") != NULL)   
+    {
+      cap.SOFTWARE_POWER = strstr(buffer,"SOFTWARE_POWER:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"TOGGLE_LIGHTS:") != NULL)   
+    {
+      cap.TOGGLE_LIGHTS = strstr(buffer,"TOGGLE_LIGHTS:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"CASE_LIGHT_BRIGHTNESS:") != NULL)   
+    {
+      cap.CASE_LIGHT_BRIGHTNESS = strstr(buffer,"CASE_LIGHT_BRIGHTNESS:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"EMERGENCY_PARSER:") != NULL)   
+    {
+      cap.EMERGENCY_PARSER = strstr(buffer,"EMERGENCY_PARSER:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"PROMPT_SUPPORT:") != NULL)   
+    {
+      cap.PROMPT_SUPPORT = strstr(buffer,"PROMPT_SUPPORT:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"AUTOREPORT_SD_STATUS:") != NULL)   
+    {
+      cap.AUTOREPORT_SD_STATUS = strstr(buffer,"AUTOREPORT_SD_STATUS:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"THERMAL_PROTECTION:") != NULL)   
+    {
+      cap.THERMAL_PROTECTION = strstr(buffer,"THERMAL_PROTECTION:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"MOTION_MODES:") != NULL)   
+    {
+      cap.MOTION_MODES = strstr(buffer,"MOTION_MODES:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
+    if(strstr(buffer,"CHAMBER_TEMPERATURE:") != NULL)   
+    {
+      cap.CHAMBER_TEMPERATURE = strstr(buffer,"CHAMBER_TEMPERATURE:1") != NULL;
+      cap.lastUpdateTime = OS_GetTime();
+    }
 }

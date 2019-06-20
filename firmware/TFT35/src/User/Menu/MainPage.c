@@ -1,7 +1,7 @@
 #include "mainpage.h"
 #include "includes.h"
 
-//1¸ötitle(±êÌâ), ITEM_PER_PAGE¸öitem(Í¼±ê+±êÇ©) 
+//1ï¿½ï¿½title(ï¿½ï¿½ï¿½ï¿½), ITEM_PER_PAGEï¿½ï¿½item(Í¼ï¿½ï¿½+ï¿½ï¿½Ç©) 
 const MENUITEMS mainPageItems = {
 //   title
 LABEL_READY,
@@ -42,5 +42,16 @@ void menuMain(void)
     }		
     loopProcess();
   }
+}
+
+void connectionCheck(void)
+{
+    static u32 nowTime = 0;
+    if(infoHost.connected)return;
+    if(OS_GetTime()<nowTime+300) return;
+
+    if(storeCmd("M115\n")==false) return;
+
+    nowTime=OS_GetTime();
 }
 

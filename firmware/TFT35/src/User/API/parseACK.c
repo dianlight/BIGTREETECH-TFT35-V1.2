@@ -62,7 +62,7 @@ void parseACK(void)
   if(infoHost.rx_ok != true) return;      //not get response data
   if(infoHost.connected == false)         //not connected to Marlin
   {
-    if(!ack_seen("T:") || !ack_seen("ok"))    goto parse_end;  //the first response should be such as "T:25/50 ok\n"
+    if(!ack_seen(connectmagic))    goto parse_end;  //the first response should the M115 response"
     infoHost.connected = true;
   }    
 
@@ -102,6 +102,16 @@ void parseACK(void)
     gcodeProcessed = true;
   }
   // end 
+
+  // Async Gcode Callback
+  if(requestCommandInfo.asyncCallback != NULL)
+  {
+    for(int c=0; c < CMD_ASYNC; c++)
+    {
+      (*requestCommandInfo.asyncCallback[c])(ack_rev_buf);
+    }
+  }
+  // End
 
   if(ack_cmp("ok\r\n") || ack_cmp("ok\n"))
   {

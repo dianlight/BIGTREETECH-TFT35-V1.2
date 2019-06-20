@@ -1,7 +1,7 @@
 #include "heat.h"
 #include "includes.h"
 
-//1��title(����), ITEM_PER_PAGE��item(ͼ��+��ǩ) 
+//1锟斤拷title(锟斤拷锟斤拷), ITEM_PER_PAGE锟斤拷item(图锟斤拷+锟斤拷签) 
 MENUITEMS heatItems = {
 //  title
 LABEL_HEAT,
@@ -44,42 +44,42 @@ const char* const heatDisplayID[] = HEAT_DISPLAY_ID;
 const char* heatCmd[] = HEAT_CMD;
 const char* heatWaitCmd[] = HEAT_WAIT_CMD;
 
-static HEATER  heater = {{0}, NOZZLE0, NOZZLE0};
+static HEATER  heater = {{{0}}, NOZZLE0, NOZZLE0};
 static u32     update_time = 300;
 static bool    update_waiting = false;
 static bool    send_waiting[HEATER_NUM];
 
-/*����Ŀ���¶�*/
+/*锟斤拷锟斤拷目锟斤拷锟铰讹拷*/
 void heatSetTargetTemp(TOOL tool,u16 temp)
 {
   heater.T[tool].target = temp;
 }
 
-/*��ȡĿ����¶�*/
+/*锟斤拷取目锟斤拷锟斤拷露锟�*/
 u16 heatGetTargetTemp(TOOL tool)
 {
   return heater.T[tool].target;
 }
 
-/* ���õ�ǰ���¶� */
+/* 锟斤拷锟矫碉拷前锟斤拷锟铰讹拷 */
 void heatSetCurrentTemp(TOOL tool, s16 temp)
 {
   heater.T[tool].current = limitValue(-99, temp, 999);
 }
 
-/* ��ȡ��ǰ���¶� */
+/* 锟斤拷取锟斤拷前锟斤拷锟铰讹拷 */
 s16 heatGetCurrentTemp(TOOL tool)
 {
   return heater.T[tool].current;
 }
 
-/* �Ƿ�ȴ����������� */
+/* 锟角凤拷却锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟� */
 bool heatGetIsWaiting(TOOL tool)
 {
   return heater.T[tool].waiting;
 }
 
-/* ��ѯ�Ƿ�����Ҫ�ȴ��ļ����� */
+/* 锟斤拷询锟角凤拷锟斤拷锟斤拷要锟饺达拷锟侥硷拷锟斤拷锟斤拷 */
 bool heatHasWaiting(void)
 {
   TOOL i;
@@ -91,7 +91,7 @@ bool heatHasWaiting(void)
   return false;
 }
 
-/* �����Ƿ�ȴ����������� */
+/* 锟斤拷锟斤拷锟角凤拷却锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟� */
 void heatSetIsWaiting(TOOL tool, bool isWaiting)
 {
   heater.T[tool].waiting = isWaiting;
@@ -114,43 +114,46 @@ void heatClearIsWaiting(void)
   update_time = 300;
 }
 
-/* ���õ�ǰ����ͷ�����ȴ� */
+/* 锟斤拷锟矫碉拷前锟斤拷锟斤拷头锟斤拷锟斤拷锟饺达拷 */
 void heatSetCurrentTool(TOOL tool)
 {
   if(tool >= HEATER_NUM) return;
   heater.tool = tool;
 }
-/* ��ȡ��ǰ����ͷ�����ȴ� */
+/* 锟斤拷取锟斤拷前锟斤拷锟斤拷头锟斤拷锟斤拷锟饺达拷 */
 TOOL heatGetCurrentTool(void)
 {
   return heater.tool;
 }
 
-/* ���õ�ǰ���ĸ���ͷ*/
+/* 锟斤拷锟矫碉拷前锟斤拷锟侥革拷锟斤拷头*/
 void heatSetCurrentToolNozzle(TOOL tool)
 {
   if(tool >= HEATER_NUM && tool < NOZZLE0) return;
   heater.nozzle = tool;
   heater.tool = tool;
 }
-/* ��ȡ��ǰ���Ǹ���ͷ*/
+/* 锟斤拷取锟斤拷前锟斤拷锟角革拷锟斤拷头*/
 TOOL heatGetCurrentToolNozzle(void)
 {
   return heater.nozzle;
 }
 
-/* ���ò�ѯ�¶ȵ�ʱ���� */
+/* 锟斤拷锟矫诧拷询锟铰度碉拷时锟斤拷锟斤拷 */
 void heatSetUpdateTime(u32 time)
 {
   update_time=time;
+#ifdef M155_AUTOREPORT
+  request_M155(time / 100);
+#endif 
 }
-/* ���õ�ǰ�Ƿ���Ҫ��ѯ�¶� */
+/* 锟斤拷锟矫碉拷前锟角凤拷锟斤拷要锟斤拷询锟铰讹拷 */
 void heatSetUpdateWaiting(bool isWaiting)
 {
   update_waiting = isWaiting;
 }
 
-/* �����Ƿ��Ѿ����ͼ������� */
+/* 锟斤拷锟斤拷锟角凤拷锟窖撅拷锟斤拷锟酵硷拷锟斤拷锟斤拷锟斤拷 */
 void heatSetSendWaiting(TOOL tool, bool isWaiting)
 {
   send_waiting[tool] = isWaiting;
@@ -278,7 +281,7 @@ void loopCheckHeater(void)
   static u32  nowTime=0;
 
   do
-  {  /* ��ʱ����M105��ѯ�¶�	*/
+  {  /* 锟斤拷时锟斤拷锟斤拷M105锟斤拷询锟铰讹拷	*/
     if(update_waiting == true)                {nowTime=OS_GetTime();break;}
     if(OS_GetTime()<nowTime+update_time)       break;
 
@@ -288,7 +291,7 @@ void loopCheckHeater(void)
     update_waiting=true;
   }while(0);
 
-  /* ��ѯ��Ҫ�ȴ��¶������ļ��������Ƿ�ﵽ�趨�¶� */
+  /* 锟斤拷询锟斤拷要锟饺达拷锟铰讹拷锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷锟斤拷锟角凤拷锏斤拷瓒拷露锟� */
   for(i=0; i<HEATER_NUM; i++)
   {
     if (heater.T[i].waiting == false)                                   continue;

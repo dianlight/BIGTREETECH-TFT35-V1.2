@@ -30,6 +30,7 @@ void Hardware_Config(void)
   infoMenu.menu[infoMenu.cur] = menuMain;
 
   u32 startUpTime = OS_GetTime();
+  resetRequestCommandInfo();
   heatSetUpdateTime(100);
   while(OS_GetTime() - startUpTime < 300)  //Display 3s logo
   {                                                                                                                     

@@ -193,6 +193,8 @@ KEY_VALUES menuKeyGetValue(void)
 
 void loopProcess (void)
 {
+  connectionCheck();                  // Check if the connection is OK.
+
   getGcodeFromFile();                 //从待打印的文件中解析出Gcode命令
 
   //    parseQueueCmd();                
@@ -200,7 +202,9 @@ void loopProcess (void)
   
   parseACK();                         //解析接收的从机应答信息
 
+#ifndef M155_AUTOREPORT
   loopCheckHeater();			            //温度相关的设置
+#endif
 
 #if defined ONBOARD_SD_SUPPORT && !defined M27_AUTOREPORT
   loopCheckPrinting();                //Check if there is a SD or USB print running.
