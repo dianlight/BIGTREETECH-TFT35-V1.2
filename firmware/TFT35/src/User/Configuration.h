@@ -49,8 +49,10 @@
   #define M27_WATCH_OTHER_SOURCES    true     // if true the polling on M27 report is always active. Case: SD print start not from TFT35
 #endif
 
+#define M290_BABYSTEPPING                     // Support Babystepping M290 command
+
 // Use M155 to report temperature instead M105 Polling ( Requires AUTO_REPORT_TEMPERATURES in Configuration_adv.h )
-//#define M155_AUTOREPORT
+#define M155_AUTOREPORT
 
 // Use M115 with EXTENDED_CAPABILITIES_REPORT and other strategies to check the config at runtime.
 #define RUNTIME_CONFIG_VALIDATE

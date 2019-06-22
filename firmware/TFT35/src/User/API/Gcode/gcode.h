@@ -23,6 +23,8 @@ typedef struct {
 extern REQUEST_COMMAND_INFO requestCommandInfo;
 
 void resetRequestCommandInfo(void);
+void closeRequestCommandInfo(bool isOK);
+
 
 bool request_M21(void);
 char *request_M20(void);

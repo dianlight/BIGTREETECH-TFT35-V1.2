@@ -58,6 +58,14 @@
             #define RUNTIME_CONFIG_VALIDATE
         #endif
 
+        #if !defined BABYSTEPPING && defined M290_BABYSTEPPING
+            #error "M290_BABYSTEPPING Enabled but Marling config without BABYSTEPPING"
+        #elif defined BABYSTEPPING && !defined M290_BABYSTEPPING
+            #define M290_BABYSTEPPING
+        #endif
+
+        
+
     #endif
 #endif
 

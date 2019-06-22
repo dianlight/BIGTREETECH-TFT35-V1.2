@@ -82,23 +82,20 @@ void parseACK(void)
     }
     else 
     {
-        requestCommandInfo.done = true;
-        requestCommandInfo.inResponse = false;
+        closeRequestCommandInfo(false);
+        ack_index = 0;
         ackPopupInfo(errormagic);
     }
     gcodeProcessed = true;
   }
   if(requestCommandInfo.inResponse && ack_seen(requestCommandInfo.errorMagic ))
   {
-    requestCommandInfo.done = true;
-    requestCommandInfo.inResponse = false;
-    requestCommandInfo.inError = true;
+    closeRequestCommandInfo(false);
     gcodeProcessed = true;
   }
   if(requestCommandInfo.inResponse &&  ack_seen(requestCommandInfo.stopMagic ))
   {
-    requestCommandInfo.done = true;
-    requestCommandInfo.inResponse = false;
+    closeRequestCommandInfo(true);
     gcodeProcessed = true;
   }
   // end 

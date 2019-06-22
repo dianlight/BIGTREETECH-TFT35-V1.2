@@ -11,9 +11,12 @@ void requestInitTimeOut(void)
   timeout = OS_GetTime();
 }
 
-bool requestHasTimeOut(void)
+bool requestHasTimeOut(int rtimeout)
 {
-  return ((OS_GetTime() - timeout) > 300);  //3s
+  bool isTimeout =  ((OS_GetTime() - timeout) > rtimeout);  
+  if(isTimeout)
+    closeRequestCommandInfo(false);
+  return isTimeout;  
 }
 
 void resetRequestCommandInfo(void) 
@@ -24,6 +27,43 @@ void resetRequestCommandInfo(void)
   requestCommandInfo.done = false;
   requestCommandInfo.inError = false;
   requestCommandInfo.asyncCallback[0] = &async_M115_callback;
+}
+
+void closeRequestCommandInfo(bool isOK) 
+{
+  requestCommandInfo.done = true;
+  requestCommandInfo.inResponse = false;
+  requestCommandInfo.inError = !isOK;
+}
+
+// Supported Autoreports
+enum {
+  AUTOREPORT_M27,
+  AUTOREPORT_M155,
+
+  SIZE_AUTOREPORTS
+};
+
+static int autoreportTimes[SIZE_AUTOREPORTS];
+
+void suspendAutoreports()
+{
+  #ifdef M27_AUTOREPORT
+    request_M27(0);
+  #endif 
+  #ifdef M155_AUTOREPORT
+    request_M155(0);
+  #endif
+}
+
+void resumeAutoreports()
+{
+  #ifdef M27_AUTOREPORT
+    request_M27(autoreportTimes[AUTOREPORT_M27]);
+  #endif 
+  #ifdef M155_AUTOREPORT
+    request_M155(autoreportTimes[AUTOREPORT_M155]);
+  #endif
 }
 
 /*
@@ -46,7 +86,7 @@ bool request_M21(void)
   mustStoreCmd(requestCommandInfo.command);
   requestInitTimeOut();
   // Wait for response
-  while (!requestCommandInfo.done && !requestHasTimeOut())
+  while (!requestCommandInfo.done && !requestHasTimeOut(300))
   {
     loopProcess();
   }
@@ -79,13 +119,15 @@ char *request_M20(void)
   strcpy(requestCommandInfo.stopMagic,"End file list");
   strcpy(requestCommandInfo.errorMagic,"Error");
   resetRequestCommandInfo();
+  suspendAutoreports();
   mustStoreCmd(requestCommandInfo.command);
   requestInitTimeOut();
   // Wait for response
-  while (!requestCommandInfo.done && !requestHasTimeOut())
+  while (!requestCommandInfo.done && !requestHasTimeOut(1000)) // SD card reader is very slow for large dirs!
   {
     loopProcess();
   }
+  resumeAutoreports();
   return requestCommandInfo.cmd_rev_buf;
 }
 
@@ -106,14 +148,15 @@ long request_M23(char *filename)
   strcpy(requestCommandInfo.stopMagic,"File selected");
   strcpy(requestCommandInfo.errorMagic,"open failed");
   resetRequestCommandInfo();
+  suspendAutoreports();
   mustStoreCmd(requestCommandInfo.command);
   requestInitTimeOut();
   // Wait for response
-  while (!requestCommandInfo.done && !requestHasTimeOut())
+  while (!requestCommandInfo.done && !requestHasTimeOut(300))
   {
     loopProcess();
   }
-
+  resumeAutoreports();
   // Find file size and report its.
   char *ptr;
   return strtol(strstr(requestCommandInfo.cmd_rev_buf,"Size:")+5, &ptr, 10);
@@ -158,6 +201,7 @@ bool request_M25(void)
  **/
 bool request_M27(int seconds)
 {
+  autoreportTimes[AUTOREPORT_M27]=seconds;
   char command[10];
   sprintf(command, "M27 S%d\n",seconds);
   mustStoreCmd(command);
@@ -169,6 +213,7 @@ bool request_M27(int seconds)
  **/
 bool request_M155(int seconds)
 {
+  autoreportTimes[AUTOREPORT_M155]=seconds;
   char command[15];
   sprintf(command, "M155 S%d\n",seconds);
   mustStoreCmd(command);
@@ -213,19 +258,8 @@ M115_CAP *async_M115(void)
 
 void async_M115_callback(char *buffer)
 {
-    if(strlen(buffer) < 30)
-    {
-      debugfixed(0,buffer);
-    } 
-    else if (strlen(buffer) < 60)
-    {
-      debugfixed(0,&buffer[strlen(buffer)-30]);
-    }
-    else
-    {
-      debugfixed(0,"%.30s",&buffer[strlen(buffer)-60]);
-      debugfixed(1,&buffer[strlen(buffer)-30]);
-    }
+    debugBar(buffer);
+
     if(strstr(buffer,"EXTRUDER_COUNT:") != NULL){
       char *ptr;
       cap.EXTRUDER_COUNT = strtol(strstr(buffer,"EXTRUDER_COUNT:")+15, &ptr, 10);
@@ -236,87 +270,87 @@ void async_M115_callback(char *buffer)
       strncpy(cap.UUID,strstr(buffer,"UUID:")+5,36); 
       cap.lastUpdateTime = OS_GetTime();
     } 
-    if(strstr(buffer,"AUTOREPORT_TEMP:") != NULL)   
+    if(strstr(buffer,"Cap:AUTOREPORT_TEMP:") != NULL)   
     {
       cap.AUTOREPORT_TEMP = strstr(buffer,"AUTOREPORT_TEMP:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"PROGRESS:") != NULL)   
+    if(strstr(buffer,"Cap:PROGRESS:") != NULL)   
     {
       cap.PROGRESS = strstr(buffer,"PROGRESS:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"AUTOLEVEL:") != NULL)   
+    if(strstr(buffer,"Cap:AUTOLEVEL:") != NULL)   
     {
       cap.AUTOLEVEL = strstr(buffer,"AUTOLEVEL:1") != NULL;
-    if(strstr(buffer,"Z_PROBE:") != NULL)   
       cap.lastUpdateTime = OS_GetTime();
     }
+    if(strstr(buffer,"Cap:Z_PROBE:") != NULL)   
     {
       cap.Z_PROBE = strstr(buffer,"Z_PROBE:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"PRINT_JOB:") != NULL)   
+    if(strstr(buffer,"Cap:PRINT_JOB:") != NULL)   
     {
       cap.PRINT_JOB = strstr(buffer,"PRINT_JOB:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"LEVELING_DATA:") != NULL)   
+    if(strstr(buffer,"Cap:LEVELING_DATA:") != NULL)   
     {
       cap.LEVELING_DATA = strstr(buffer,"LEVELING_DATA:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"BUILD_PERCENT:") != NULL)   
+    if(strstr(buffer,"Cap:BUILD_PERCENT:") != NULL)   
     {
       cap.BUILD_PERCENT = strstr(buffer,"BUILD_PERCENT:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"VOLUMETRIC:") != NULL)   
+    if(strstr(buffer,"Cap:VOLUMETRIC:") != NULL)   
     {
       cap.VOLUMETRIC = strstr(buffer,"VOLUMETRIC:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"SOFTWARE_POWER:") != NULL)   
+    if(strstr(buffer,"Cap:SOFTWARE_POWER:") != NULL)   
     {
       cap.SOFTWARE_POWER = strstr(buffer,"SOFTWARE_POWER:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"TOGGLE_LIGHTS:") != NULL)   
+    if(strstr(buffer,"Cap:TOGGLE_LIGHTS:") != NULL)   
     {
       cap.TOGGLE_LIGHTS = strstr(buffer,"TOGGLE_LIGHTS:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"CASE_LIGHT_BRIGHTNESS:") != NULL)   
+    if(strstr(buffer,"Cap:CASE_LIGHT_BRIGHTNESS:") != NULL)   
     {
       cap.CASE_LIGHT_BRIGHTNESS = strstr(buffer,"CASE_LIGHT_BRIGHTNESS:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"EMERGENCY_PARSER:") != NULL)   
+    if(strstr(buffer,"Cap:EMERGENCY_PARSER:") != NULL)   
     {
       cap.EMERGENCY_PARSER = strstr(buffer,"EMERGENCY_PARSER:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"PROMPT_SUPPORT:") != NULL)   
+    if(strstr(buffer,"Cap:PROMPT_SUPPORT:") != NULL)   
     {
       cap.PROMPT_SUPPORT = strstr(buffer,"PROMPT_SUPPORT:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"AUTOREPORT_SD_STATUS:") != NULL)   
+    if(strstr(buffer,"Cap:AUTOREPORT_SD_STATUS:") != NULL)   
     {
       cap.AUTOREPORT_SD_STATUS = strstr(buffer,"AUTOREPORT_SD_STATUS:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"THERMAL_PROTECTION:") != NULL)   
+    if(strstr(buffer,"Cap:THERMAL_PROTECTION:") != NULL)   
     {
       cap.THERMAL_PROTECTION = strstr(buffer,"THERMAL_PROTECTION:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"MOTION_MODES:") != NULL)   
+    if(strstr(buffer,"Cap:MOTION_MODES:") != NULL)   
     {
       cap.MOTION_MODES = strstr(buffer,"MOTION_MODES:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
-    if(strstr(buffer,"CHAMBER_TEMPERATURE:") != NULL)   
+    if(strstr(buffer,"Cap:CHAMBER_TEMPERATURE:") != NULL)   
     {
       cap.CHAMBER_TEMPERATURE = strstr(buffer,"CHAMBER_TEMPERATURE:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
