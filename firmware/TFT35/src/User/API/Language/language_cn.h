@@ -80,5 +80,8 @@
     #define CN_ONBOARD              "∞Â‘ÿSD"
     #define CN_TFT                  "TFT"
 
+    #define CN_CHECK_CONFIG         "Check"        
+
+
 
 #endif

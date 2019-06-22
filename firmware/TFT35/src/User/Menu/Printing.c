@@ -13,7 +13,12 @@ LABEL_BACKGROUND,
   {ICON_HEAT,                 LABEL_HEAT},
   {ICON_FAN,                  LABEL_FAN},
   {ICON_PERCENTAGE,           LABEL_PERCENTAGE},
-  {ICON_BABYSTEP,             LABEL_BABYSTEP},}
+#ifdef M290_BABYSTEPPING
+  {ICON_BABYSTEP,             LABEL_BABYSTEP},
+#else 
+  {ICON_BACKGROUND,           LABEL_BACKGROUND},
+#endif  
+},
 };
 
 const ITEM itemIsPause[2] = {
@@ -388,9 +393,11 @@ void menuPrinting(void)
         infoMenu.menu[++infoMenu.cur] = menuSpeed;
         break;
       
+#ifdef M290_BABYSTEPPING      
       case KEY_ICON_7:
         infoMenu.menu[++infoMenu.cur] = menuBabyStep;
         break;
+#endif        
       
       default :break;
     }                

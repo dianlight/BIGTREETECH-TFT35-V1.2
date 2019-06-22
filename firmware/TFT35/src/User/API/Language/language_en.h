@@ -79,4 +79,7 @@
 
     #define EN_ONBOARD              "Onboard" 
     #define EN_TFT                  "TFT"
+
+    #define EN_CHECK_CONFIG         "Check"        
+
 #endif

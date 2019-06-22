@@ -86,6 +86,7 @@ const char *const en_pack[LABEL_NUM]={
   EN_CONFIRM,
   EN_ONBOARD,
   EN_TFT,
+  EN_CHECK_CONFIG,    
 };
 
 const char *const cn_pack[LABEL_NUM]={
@@ -166,6 +167,7 @@ const char *const cn_pack[LABEL_NUM]={
   CN_CONFIRM,
   CN_ONBOARD,
   CN_TFT,
+  CN_CHECK_CONFIG,    
 };
 
 const char *const ru_pack[LABEL_NUM]={
@@ -246,6 +248,7 @@ const char *const ru_pack[LABEL_NUM]={
   RU_CONFIRM,
   RU_ONBOARD,
   RU_TFT,
+  RU_CHECK_CONFIG,    
 };
 
 const char *const jp_pack[LABEL_NUM]={
@@ -326,6 +329,7 @@ const char *const jp_pack[LABEL_NUM]={
   JP_CONFIRM,
   JP_ONBOARD,
   JP_TFT,
+  JP_CHECK_CONFIG,    
 };
 
 const char *const am_pack[LABEL_NUM]={
@@ -406,6 +410,7 @@ const char *const am_pack[LABEL_NUM]={
   AM_CONFIRM,
   AM_ONBOARD,
   AM_TFT,
+  AM_CHECK_CONFIG,    
 };
 
 const char *const de_pack[LABEL_NUM]={
@@ -486,6 +491,7 @@ const char *const de_pack[LABEL_NUM]={
   DE_CONFIRM,
   DE_ONBOARD,
   DE_TFT,
+  DE_CHECK_CONFIG,    
 };
 
 bool isRussia(const u8 *const str)

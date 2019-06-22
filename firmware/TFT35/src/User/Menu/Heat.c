@@ -97,12 +97,15 @@ void heatSetIsWaiting(TOOL tool, bool isWaiting)
   heater.T[tool].waiting = isWaiting;
   if(isWaiting == true)
   {
-    update_time = 100;
+    update_time = 100;    
   }
   else if(heatHasWaiting() == false)
   {
     update_time = 300;		
   }
+#ifdef M155_AUTOREPORT
+  async_M155(update_time / 100);
+#endif 
 }
 
 void heatClearIsWaiting(void)
@@ -112,6 +115,9 @@ void heatClearIsWaiting(void)
     heater.T[i].waiting = false;
   }
   update_time = 300;
+  #ifdef M155_AUTOREPORT
+    async_M155(update_time / 100);
+  #endif 
 }
 
 /* 锟斤拷锟矫碉拷前锟斤拷锟斤拷头锟斤拷锟斤拷锟饺达拷 */
@@ -144,7 +150,7 @@ void heatSetUpdateTime(u32 time)
 {
   update_time=time;
 #ifdef M155_AUTOREPORT
-  request_M155(time / 100);
+  async_M155(time / 100);
 #endif 
 }
 /* 锟斤拷锟矫碉拷前锟角凤拷锟斤拷要锟斤拷询锟铰讹拷 */
@@ -185,6 +191,9 @@ void menuHeat(void)
   KEY_VALUES  key_num = KEY_IDLE;
 
   update_time=100;
+#ifdef M155_AUTOREPORT
+  async_M155(update_time / 100);
+#endif   
 
   menuDrawPage(&heatItems);
   showTemperature();
@@ -309,6 +318,9 @@ void loopCheckHeater(void)
 
     if(infoMenu.menu[infoMenu.cur] == menuHeat)                         break;
     update_time=300;
+#ifdef M155_AUTOREPORT
+    async_M155(update_time / 100);
+#endif     
   }
 }
 

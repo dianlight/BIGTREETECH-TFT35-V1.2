@@ -80,4 +80,7 @@
     #define RU_ONBOARD              "§ß§Ñ §Ò§à§â§ä§å"  // Google translator. I don't know the language. Please correct
     #define RU_TFT                  "TFT"
 
+    #define RU_CHECK_CONFIG         "Check"        
+
+
 #endif

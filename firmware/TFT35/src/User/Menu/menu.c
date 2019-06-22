@@ -210,6 +210,10 @@ void loopProcess (void)
   loopCheckPrinting();                //Check if there is a SD or USB print running.
 #endif
 
+#if defined M155_AUTOREPORT || defined  M27_AUTOREPORT
+  loopAutoreportRefresh();            // Unsleep every XXX seconds. (Usefull if the printer reboot but the TFT no)
+#endif
+
   loopReminderClear();	              //若状态栏有提示信息，定时清除
 
   loopBusySignClear();                //Busy Indicator clear

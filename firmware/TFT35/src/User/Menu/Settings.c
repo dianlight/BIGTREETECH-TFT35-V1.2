@@ -35,28 +35,39 @@ char CHECKS[TOTAL_CHECKS];
 bool displayCheck()
 {
    bool ok = true;
+   char errorCode[TOTAL_CHECKS];
    char checks[14+TOTAL_CHECKS];
    strcpy(checks,"Fw check   :  ");
    for(int i=0; i < TOTAL_CHECKS; i++)
    {
      if(CHECKS[i] == 0){
-        strcpy(&checks[13+i],"E");
+//        strcpy(&checks[13+i],"E");
+        checks[13+i]='E';
         GUI_SetColor(RED);
         char errorMessage[132];
         sprintf(errorMessage, "ERROR CODE: ");
         GUI_DispString(10,250,(u8 *)errorMessage,0);
         sprintf(errorMessage, "%d",i);
         GUI_DispString(10+((13+i)*BYTE_WIDTH),250,(u8 *)errorMessage,0);
+        sprintf(&errorCode[i],"%d",i);
         ok = false;
      } else if (CHECKS[i] == 1){
-        strcpy(&checks[13+i],"*");
+        sprintf(&errorCode[i],"A");
+        checks[13+i]=251;
      } else {
-        strcpy(&checks[13+i],".");
+        sprintf(&errorCode[i],"0");
+        checks[13+i]=247;
      }
    }
    GUI_ClearRect(0,startLine+120,LCD_WIDTH,startLine+120+BYTE_HEIGHT);
    GUI_DispString(10,startLine+120,(u8 *)checks,0);
    GUI_SetColor(FK_COLOR);
+    // PopUp error with qrcode
+   popupDrawQRCode(&bottomSingleBtn ,(u8* )"Fail!", (u8 *)checks, textSelect(LABEL_CONFIRM), NULL);    // FIXME: Use a language string
+   if(infoMenu.menu[infoMenu.cur] != menuPopup)
+      infoMenu.menu[++infoMenu.cur] = menuPopup;
+
+
    return ok;
 }
 
@@ -88,7 +99,33 @@ void menuInfo(void)
   GUI_DispString(10,startLine+90,(u8 *)"Printer ID : ",0);
   Scroll_CreatePara(&uuidScroll, (u8* )MACHINE_UUID,&uuidRect);
  #endif
- #ifdef RUNTIME_CONFIG_VALIDATE 
+ 
+  GUI_SetColor(FK_COLOR);
+  while(!isPress()){
+   #if defined MACHINE_UUID
+    Scroll_DispString(&uuidScroll,1,LEFT); 
+   #endif 
+    loopProcess();
+  } 
+  while(isPress()){
+   #if defined MACHINE_UUID
+    Scroll_DispString(&uuidScroll,1,LEFT); 
+   #endif 
+    loopProcess();
+  }  
+
+  infoMenu.cur--;
+}
+
+void menuCheck(void)
+{
+  GUI_Clear(BLACK);
+
+  GUI_DispString(10,startLine,(u8 *)"Board      : BIGTREETECH_TFT35_"VER,0);
+  GUI_DispString(10,startLine+30,(u8 *)"Firmware   : "VER"." STRINGIFY(SOFTWARE_VERSION) " " __DATE__,0);
+ #ifdef MARLIN2_AUTOCONFIG
+  GUI_DispString(10,startLine+60,(u8 *)"Printer Fw : "SHORT_BUILD_VERSION,0);
+ #endif 
   GUI_DispString(10,startLine+120,(u8 *)"Fw check   : (Pending....)",0);
   M115_CAP *myCap = async_M115();
   memset(CHECKS,3,TOTAL_CHECKS);
@@ -100,11 +137,11 @@ void menuInfo(void)
       GUI_SetColor(RED);
       GUI_DispString(10,startLine+90,(u8 *)"Printer ID : ",0);    
       GUI_SetColor(FK_COLOR);
-      checkOK(CHECK_UUID;
+      checkOK(CHECK_UUID);
     }
     else
     {
-      checkError(CHECK_UUID;
+      checkError(CHECK_UUID);
     }
   #else
     GUI_DispString(10,startLine+90,(u8 *)"Printer ID : ",0);
@@ -125,14 +162,15 @@ void menuInfo(void)
     else checkError(CHECK_M155_AUTOREPORT);
   #endif
   displayCheck();
-  GUI_DispString(10,280,(u8 *)"Click to contine...",0);
+  GUI_DispString(50,290,(u8 *)"Click to contine...",0); // FIXME: Use a language string
   }
   else 
   {
-    GUI_ClearRect(0,startLine+120,LCD_WIDTH,startLine+120+BYTE_HEIGHT);
-    GUI_DispString(10,startLine+120,(u8 *)"Fw check   : ERROR!",0);
+    // PopUp error.
+    popupDrawPage(&bottomSingleBtn ,(u8* )"Check Error", (u8 *)"Unable to perform check", textSelect(LABEL_CONFIRM), NULL);    // FIXME: Use a language string
+    if(infoMenu.menu[infoMenu.cur] != menuPopup)
+      infoMenu.menu[++infoMenu.cur] = menuPopup;
   }
- #endif
   GUI_SetColor(FK_COLOR);
   while(!isPress()){
    #if defined MACHINE_UUID || defined RUNTIME_CONFIG_VALIDATE
@@ -149,6 +187,7 @@ void menuInfo(void)
 
   infoMenu.cur--;
 }
+
 
 void menuDisconnect(void)
 {
@@ -178,7 +217,11 @@ LABEL_SETTINGS,
   {ICON_SCREEN_INFO,          LABEL_SCREEN_INFO},
   {ICON_DISCONNECT,           LABEL_DISCONNECT},
   {ICON_BAUDRATE,             LABEL_BAUDRATE_115200},
+#ifdef RUNTIME_CONFIG_VALIDATE  
+  {ICON_CHECK_CONFIG,         LABEL_CHECK_CONFIG},
+#else
   {ICON_BACKGROUND,           LABEL_BACKGROUND},
+#endif  
   {ICON_BACK,                 LABEL_BACK},}
 };
 
@@ -240,6 +283,12 @@ void menuSettings(void)
         USART1_Config(infoSettings.baudrate);
         break;
       
+      #ifdef RUNTIME_CONFIG_VALIDATE 
+      case KEY_ICON_6:
+        infoMenu.menu[++infoMenu.cur] = menuCheck;
+        break;
+      #endif
+
       case KEY_ICON_7:
         infoMenu.cur--;
         break;

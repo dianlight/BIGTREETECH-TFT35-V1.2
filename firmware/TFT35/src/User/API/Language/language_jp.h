@@ -80,5 +80,7 @@
     #define JP_ONBOARD              "™CÄÚ¤Ç"  // Google translator. I don't know the language. Please correct
     #define JP_TFT                  "TFT"
 
+    #define JP_CHECK_CONFIG         "Check"        
+
 
 #endif

@@ -44,7 +44,7 @@ enum {
   SIZE_AUTOREPORTS
 };
 
-static int autoreportTimes[SIZE_AUTOREPORTS];
+static int autoreportTimes[SIZE_AUTOREPORTS] = { 300, 300 };
 
 void suspendAutoreports()
 {
@@ -52,7 +52,7 @@ void suspendAutoreports()
     request_M27(0);
   #endif 
   #ifdef M155_AUTOREPORT
-    request_M155(0);
+    async_M155(0);
   #endif
 }
 
@@ -62,9 +62,25 @@ void resumeAutoreports()
     request_M27(autoreportTimes[AUTOREPORT_M27]);
   #endif 
   #ifdef M155_AUTOREPORT
-    request_M155(autoreportTimes[AUTOREPORT_M155]);
+    async_M155(autoreportTimes[AUTOREPORT_M155]);
   #endif
 }
+
+static u32 lastCheck = 0;
+void loopAutoreportRefresh(void)
+{
+    if  ((OS_GetTime() - lastCheck) > 3000) // 30sec
+    {
+        #ifdef M27_AUTOREPORT
+          request_M27(autoreportTimes[AUTOREPORT_M27]);
+        #endif 
+        #ifdef M155_AUTOREPORT
+          async_M155(autoreportTimes[AUTOREPORT_M155]);
+        #endif
+        lastCheck = OS_GetTime();
+    }
+}
+
 
 /*
     Send M21 command and wait for response
@@ -201,7 +217,8 @@ bool request_M25(void)
  **/
 bool request_M27(int seconds)
 {
-  autoreportTimes[AUTOREPORT_M27]=seconds;
+  if(seconds != 0)
+     autoreportTimes[AUTOREPORT_M27]=seconds;
   char command[10];
   sprintf(command, "M27 S%d\n",seconds);
   mustStoreCmd(command);
@@ -211,13 +228,13 @@ bool request_M27(int seconds)
 /**
  * Temperature auto report ( same as M105 )
  **/
-bool request_M155(int seconds)
+bool async_M155(int seconds)
 {
-  autoreportTimes[AUTOREPORT_M155]=seconds;
+  if(seconds != 0)
+      autoreportTimes[AUTOREPORT_M155]=seconds;
   char command[15];
   sprintf(command, "M155 S%d\n",seconds);
-  mustStoreCmd(command);
-  return true;
+  return storeCmd(command);
 }
 
 /**
@@ -251,7 +268,7 @@ M115_CAP *async_M115(void)
 {
   if(cap.lastUpdateTime == 0){
     resetRequestCommandInfo();
-    mustStoreCmd("M115\n");
+    storeCmd("M115\n");
   } 
   return &cap;
 }

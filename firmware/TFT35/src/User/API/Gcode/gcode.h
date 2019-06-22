@@ -25,6 +25,7 @@ extern REQUEST_COMMAND_INFO requestCommandInfo;
 void resetRequestCommandInfo(void);
 void closeRequestCommandInfo(bool isOK);
 
+void loopAutoreportRefresh(void);
 
 bool request_M21(void);
 char *request_M20(void);
@@ -33,7 +34,8 @@ bool request_M27(int seconds);
 bool request_M524(void);
 bool request_M24(int pos);
 long request_M23(char *filename);
-bool request_M155(int seconds);
+
+bool async_M155(int seconds);
 
 typedef struct {
     uint32_t    lastUpdateTime;

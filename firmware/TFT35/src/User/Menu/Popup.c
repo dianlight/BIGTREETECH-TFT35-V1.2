@@ -1,6 +1,15 @@
 #include "Popup.h"
-#include "includes.h"
-
+#include "configuration.h"
+#include "autoconfiguration.h"
+#include "qrcode.h"
+#include "lcd.h"
+#include "GUI.h"
+#include "language.h"
+#include "ui_draw.h"
+#include "touch_process.h"
+#include "interfaceCmd.h"
+#include "coordinate.h"
+#include "ff.h"
 
 #define BUTTON_NUM 1
 
@@ -16,13 +25,13 @@ BUTTON bottomDoubleBtn[] = {
 
 
 WINDOW window = {
-  POPUP_RECT_WINDOW,       //µ¯´°µÄÇøÓò
-  10,                      //ËÄ½ÇÔ²»¡µÄ°ë¾¶
-  3,                       //Íâ±ßµÄÏß¿í
-  0x5D7B,                  //Íâ±ßºÍ±êÌâÀ¸µÄ±³¾°É«
-  {BRED, 0x5D7B, 40},      //±êÌâÀ¸ ×ÖÌåÉ«/±³¾°É«/¸ß¶È
-  {WHITE, BLACK,  110},    //ÎÄ±¾À¸ ×ÖÌåÉ«/±³¾°É«/¸ß¶È
-  {WHITE, GRAY,   70},     //µ×²¿ (×ÖÌåÉ«)/±³¾°É«/(¸ß¶È)
+  POPUP_RECT_WINDOW,       //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+  10,                      //ï¿½Ä½ï¿½Ô²ï¿½ï¿½ï¿½Ä°ë¾¶
+  3,                       //ï¿½ï¿½ßµï¿½ï¿½ß¿ï¿?
+  0x5D7B,                  //ï¿½ï¿½ßºÍ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½É?
+  {BRED, 0x5D7B, 40},      //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½É«/ï¿½ï¿½ï¿½ï¿½É«/ï¿½ß¶ï¿½
+  {WHITE, BLACK,  110},    //ï¿½Ä±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½É«/ï¿½ï¿½ï¿½ï¿½É«/ï¿½ß¶ï¿½
+  {WHITE, GRAY,   70},     //ï¿½×²ï¿½ (ï¿½ï¿½ï¿½ï¿½É«)/ï¿½ï¿½ï¿½ï¿½É«/(ï¿½ß¶ï¿½)
 };
 
 static BUTTON *windowButton =  NULL;
@@ -54,6 +63,50 @@ void popupDrawPage(BUTTON *btn, const u8 *title, const u8 *context, const u8 *ye
   
   TSC_ReDrawIcon = windowReDrawButton;
   GUI_DrawWindow(&window, title, context);
+  
+  for(u8 i = 0; i < buttonNum; i++)
+    GUI_DrawButton(&windowButton[i], 0);    
+}
+
+void popupDrawQRCode(BUTTON *btn, const u8 *title, const u8 *context, const u8 *yes, const u8 *no)
+{
+  buttonNum = 0;
+  windowButton = btn;
+  if(yes)
+  {
+    windowButton[buttonNum++].context = yes;
+  }
+  if(no)
+  {
+    windowButton[buttonNum++].context = no;
+  }
+  
+  TSC_ReDrawIcon = windowReDrawButton;
+  GUI_DrawWindow(&window, title,(u8 *)"");
+
+  // Create the QR code
+  QRCode qrcode;
+  uint8_t qrcodeData[qrcode_getBufferSize(3)];
+  qrcode_initText(&qrcode, qrcodeData, 3, 0,(char *)context);
+
+
+  int scale = 2;
+  int x_pos = 50;
+  int y_pos = 50;
+  for (int y = 0; y < qrcode.size; y++) {
+    for (int x = 0; x < qrcode.size; x++) {
+        if (qrcode_getModule(&qrcode, x, y)) 
+        {
+//            GUI_SetColor(FK_COLOR);
+//            GUI_DrawPoint(x+10,y+10);
+            GUI_FillRectColor( (x*scale)+x_pos,(y*scale)+y_pos,(x*scale)+x_pos+scale,(y*scale)+y_pos+scale,WHITE);
+//        } else {
+//            Serial.print("  ");
+        }
+  }
+
+}
+
   
   for(u8 i = 0; i < buttonNum; i++)
     GUI_DrawButton(&windowButton[i], 0);    
