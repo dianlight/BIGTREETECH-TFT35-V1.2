@@ -17,7 +17,7 @@ static const char actioncommandmagic[] = "action:";  // Marlin
 #endif 
 
 
-#define ACK_MAX_SIZE 300
+#define ACK_MAX_SIZE 3000 // Need a big buffer because some commands returns big elements
 extern char ack_rev_buf_ml[ACK_MAX_SIZE];
 
 void parseACKml(void);

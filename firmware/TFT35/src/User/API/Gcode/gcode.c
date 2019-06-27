@@ -1,6 +1,5 @@
 #include "gcode.h"
 #include "includes.h"
-#include "logger.h"
 
 REQUEST_COMMAND_INFO requestCommandInfo;
 
@@ -266,7 +265,7 @@ static M115_CAP cap;
 
 M115_CAP *async_M115(void)
 {
-  if(cap.lastUpdateTime == 0){
+  if(OS_GetTime() - cap.lastUpdateTime > 300 ){
     resetRequestCommandInfo();
     storeCmd("M115\n");
   } 
@@ -275,8 +274,6 @@ M115_CAP *async_M115(void)
 
 void async_M115_callback(char *buffer)
 {
-    debugBar(buffer);
-
     if(strstr(buffer,"EXTRUDER_COUNT:") != NULL){
       char *ptr;
       cap.EXTRUDER_COUNT = strtol(strstr(buffer,"EXTRUDER_COUNT:")+15, &ptr, 10);
@@ -287,89 +284,25 @@ void async_M115_callback(char *buffer)
       strncpy(cap.UUID,strstr(buffer,"UUID:")+5,36); 
       cap.lastUpdateTime = OS_GetTime();
     } 
-    if(strstr(buffer,"Cap:AUTOREPORT_TEMP:") != NULL)   
+    if(strstr(buffer,"Cap:") != NULL)   
     {
-      cap.AUTOREPORT_TEMP = strstr(buffer,"AUTOREPORT_TEMP:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:PROGRESS:") != NULL)   
-    {
-      cap.PROGRESS = strstr(buffer,"PROGRESS:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:AUTOLEVEL:") != NULL)   
-    {
-      cap.AUTOLEVEL = strstr(buffer,"AUTOLEVEL:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:Z_PROBE:") != NULL)   
-    {
-      cap.Z_PROBE = strstr(buffer,"Z_PROBE:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:PRINT_JOB:") != NULL)   
-    {
-      cap.PRINT_JOB = strstr(buffer,"PRINT_JOB:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:LEVELING_DATA:") != NULL)   
-    {
-      cap.LEVELING_DATA = strstr(buffer,"LEVELING_DATA:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:BUILD_PERCENT:") != NULL)   
-    {
-      cap.BUILD_PERCENT = strstr(buffer,"BUILD_PERCENT:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:VOLUMETRIC:") != NULL)   
-    {
-      cap.VOLUMETRIC = strstr(buffer,"VOLUMETRIC:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:SOFTWARE_POWER:") != NULL)   
-    {
-      cap.SOFTWARE_POWER = strstr(buffer,"SOFTWARE_POWER:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:TOGGLE_LIGHTS:") != NULL)   
-    {
-      cap.TOGGLE_LIGHTS = strstr(buffer,"TOGGLE_LIGHTS:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:CASE_LIGHT_BRIGHTNESS:") != NULL)   
-    {
-      cap.CASE_LIGHT_BRIGHTNESS = strstr(buffer,"CASE_LIGHT_BRIGHTNESS:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:EMERGENCY_PARSER:") != NULL)   
-    {
-      cap.EMERGENCY_PARSER = strstr(buffer,"EMERGENCY_PARSER:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:PROMPT_SUPPORT:") != NULL)   
-    {
-      cap.PROMPT_SUPPORT = strstr(buffer,"PROMPT_SUPPORT:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:AUTOREPORT_SD_STATUS:") != NULL)   
-    {
-      cap.AUTOREPORT_SD_STATUS = strstr(buffer,"AUTOREPORT_SD_STATUS:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:THERMAL_PROTECTION:") != NULL)   
-    {
-      cap.THERMAL_PROTECTION = strstr(buffer,"THERMAL_PROTECTION:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:MOTION_MODES:") != NULL)   
-    {
-      cap.MOTION_MODES = strstr(buffer,"MOTION_MODES:1") != NULL;
-      cap.lastUpdateTime = OS_GetTime();
-    }
-    if(strstr(buffer,"Cap:CHAMBER_TEMPERATURE:") != NULL)   
-    {
-      cap.CHAMBER_TEMPERATURE = strstr(buffer,"CHAMBER_TEMPERATURE:1") != NULL;
+      cap.AUTOREPORT_TEMP |= strstr(buffer,"AUTOREPORT_TEMP:1") != NULL;
+      cap.PROGRESS |= strstr(buffer,"PROGRESS:1") != NULL;
+      cap.AUTOLEVEL |= strstr(buffer,"AUTOLEVEL:1") != NULL;
+      cap.Z_PROBE |= strstr(buffer,"Z_PROBE:1") != NULL;
+      cap.PRINT_JOB |= strstr(buffer,"PRINT_JOB:1") != NULL;
+      cap.LEVELING_DATA |= strstr(buffer,"LEVELING_DATA:1") != NULL;
+      cap.BUILD_PERCENT |= strstr(buffer,"BUILD_PERCENT:1") != NULL;
+      cap.VOLUMETRIC |= strstr(buffer,"VOLUMETRIC:1") != NULL;
+      cap.SOFTWARE_POWER |= strstr(buffer,"SOFTWARE_POWER:1") != NULL;
+      cap.TOGGLE_LIGHTS |= strstr(buffer,"TOGGLE_LIGHTS:1") != NULL;
+      cap.CASE_LIGHT_BRIGHTNESS |= strstr(buffer,"CASE_LIGHT_BRIGHTNESS:1") != NULL;
+      cap.EMERGENCY_PARSER |= strstr(buffer,"EMERGENCY_PARSER:1") != NULL;
+      cap.PROMPT_SUPPORT |= strstr(buffer,"PROMPT_SUPPORT:1") != NULL;
+      cap.AUTOREPORT_SD_STATUS |= strstr(buffer,"AUTOREPORT_SD_STATUS:1") != NULL;
+      cap.THERMAL_PROTECTION |= strstr(buffer,"THERMAL_PROTECTION:1") != NULL;
+      cap.MOTION_MODES |= strstr(buffer,"MOTION_MODES:1") != NULL;
+      cap.CHAMBER_TEMPERATURE |= strstr(buffer,"CHAMBER_TEMPERATURE:1") != NULL;
       cap.lastUpdateTime = OS_GetTime();
     }
 }

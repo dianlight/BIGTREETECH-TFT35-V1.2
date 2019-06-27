@@ -1,6 +1,10 @@
 #ifndef _TFT35_CONFIGRATION_H_
 #define _TFT35_CONFIGRATION_H_
 
+
+#define FIRMWARE_SOURCE "https://github.com/dianlight/BIGTREETECH-TFT35-V1.2"
+//#define FIRMWARE_SOURCE "https://github.com/bigtreetech/BIGTREETECH-TFT35-V1.2"
+
 /**
  * AUTOCONFIGURATION
  * NOTE: If MARLIN2_AUTOCONFIG is defined all config in this file is use only as default and the setting ( if exists or are derivable )

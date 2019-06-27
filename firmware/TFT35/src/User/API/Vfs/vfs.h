@@ -9,7 +9,8 @@
 
 typedef enum {
     TFT_SD,
-    BOARD_SD
+    BOARD_SD,
+	SERIAL
 }FS_SOURCE;
 
 typedef struct 

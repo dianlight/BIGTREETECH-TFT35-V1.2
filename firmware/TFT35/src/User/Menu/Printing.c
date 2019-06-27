@@ -174,6 +174,12 @@ void menuBeforePrinting(void)
 
       startGcodeExecute();
       break;
+    case SERIAL: // GCode from another serial or USB
+      infoPrinting.size  = size;
+      infoPrinting.printing = true;
+      printSetUpdateWaiting(true);
+      infoHost.printing=true; 
+    break;  
   }
   infoMenu.menu[infoMenu.cur] = menuPrinting;
 }
@@ -200,7 +206,13 @@ bool setPrintPause(bool is_pause)
         request_M24(0);
       }
       break;
-      
+    case SERIAL:
+      if(is_pause){
+        sendActionCommandPause();
+      } else {
+        sendActionCommandResume();
+      }
+      break;  
     case TFT_SD:
       while (infoCmd.count != 0) {loopProcess();}
 
@@ -451,6 +463,9 @@ void haltPrinting(void)
   case TFT_SD:
     clearCmdQueue();	
     break;
+  case SERIAL:
+    sendActionCommandCancel();
+    break;  
   }
 
   heatClearIsWaiting();

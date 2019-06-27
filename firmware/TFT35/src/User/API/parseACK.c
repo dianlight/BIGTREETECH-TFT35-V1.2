@@ -1,5 +1,4 @@
 #include "parseACK.h"
-#include "logger.h"
 #include <ctype.h>
 
 char ack_rev_buf_ml[ACK_MAX_SIZE];
@@ -87,9 +86,6 @@ void parseACK(void)
     infoHost.connected = true;
   }    
 
-  debugBar(ack_rev_buf);
-
-
   // GCode command response
   bool gcodeProcessed = false;
   if(requestCommandInfo.inWaitResponse && ack_seen(requestCommandInfo.startMagic))
@@ -103,6 +99,7 @@ void parseACK(void)
     if(strlen(requestCommandInfo.cmd_rev_buf)+strlen(ack_rev_buf) < CMD_MAX_REV)
     {
         strcat(requestCommandInfo.cmd_rev_buf,ack_rev_buf);
+        strcat(requestCommandInfo.cmd_rev_buf,"\n");
     }
     else 
     {
@@ -134,7 +131,7 @@ void parseACK(void)
   }
   // End
 
-  if(ack_cmp("ok\r\n") || ack_cmp("ok\n"))
+  if(ack_cmp("ok\r") || ack_cmp("ok"))
   {
     infoHost.wait = false;	
   }
@@ -163,7 +160,7 @@ void parseACK(void)
       heatSetCurrentTemp(BED,ack_value()+0.5);
       heatSetTargetTemp(BED, ack_second_value()+0.5);
     }
-    else if(infoHost.connected && ack_seen(echomagic) && ack_seen(busymagic) && ack_seen("processing") && infoMenu.menu[infoMenu.cur] != menuPopup)
+    else if(infoHost.connected && ack_seen(echomagic) && ack_seen(busymagic) && ack_seen("processing"))
     {
       busyIndicator(STATUS_BUSY);
     }
@@ -202,8 +199,8 @@ void parseACK(void)
   #ifdef M118_ACTION_COMMAND
     else if(ack_seen(commentmagic) && ack_seen_ic(actioncommandmagic))
     {
-        parseHostAction(&ack_rev_buf[ack_index]);
-        ackPopupInfo("ACTION");
+        if(!parseHostAction(&ack_rev_buf[ack_index]))
+          ackPopupInfo("Unknown ACTION");
     }
   #endif
   }

@@ -1,13 +1,12 @@
 #include "host_actions.h"
-#include "includes.h"
 
 // Supported Action https://reprap.org/wiki/G-code#Action_commands
 // Original Octoprint Action Commands
-//#define ACTION_PAUSE            "pause"                      // pause current print
-//#define ACTION_CANCEL           "cancel"                     // cancel the current printer job ( a message is optional )
+#define ACTION_PAUSE            "pause"                      // pause current print
+#define ACTION_CANCEL           "cancel"                     // cancel the current printer job ( a message is optional )
 //#define ACTION_DISCONNET        "disconnect"                 // disconnect
 //#define ACTION_PAUSED           "paused"                     // the job is paused        
-//#define ACTION_RESUME           "resume"                     // resume the job
+#define ACTION_RESUME           "resume"                     // resume the job
 //#define ACTION_OUT_OF_FILAMENT  "out_of_filament T%d"        // out of filement on %d extruder_id
 //#define ACTION_RESUMED          "resumed"                    // the job is resumed
 
@@ -31,12 +30,12 @@
 #define ACTION_STATUS        "status"                       // Change status event ( message )
 
 
-void parseHostAction(char *action)
+bool parseHostAction(char *action)
 {
     if( strstr(action,ACTION_START) != NULL || strstr(action, ACTION_PROGRESS) != NULL)
     {
       if(!infoHost.printing && infoMenu.menu[infoMenu.cur] != menuPrinting && !infoHost.printing) {
-          infoMenu.menu[++infoMenu.cur] = menuPrinting;
+          infoMenu.menu[++infoMenu.cur] = menuBeforePrinting;
           infoHost.printing=true;
       }
       int position, time;
@@ -46,11 +45,30 @@ void parseHostAction(char *action)
             setPrintCur(position);
             setABSPrintingTime(time);
       }
+      return true;
     }
     else if ( strstr(action,ACTION_STATUS) != NULL )
     {
         popupDrawPage(&bottomSingleBtn ,(u8* )LABEL_READY, (u8 *)strstr(action,ACTION_STATUS) + sizeof(ACTION_STATUS), textSelect(LABEL_CONFIRM), NULL);    
         if(infoMenu.menu[infoMenu.cur] != menuPopup)
         infoMenu.menu[++infoMenu.cur] = menuPopup;
+        return true;
     }
+    return false;
 }
+
+void sendActionCommandPause(void)
+{
+    mustStoreCmd((u8 *)"M118 A1 "ACTION_PAUSE"\n");
+}
+
+void sendActionCommandResume(void)
+{
+    mustStoreCmd((u8 *)"M118 A1 "ACTION_RESUME"\n");
+}
+
+void sendActionCommandCancel(void)
+{
+    mustStoreCmd((u8 *)"M118 A1 "ACTION_CANCEL"\n");
+}
+
