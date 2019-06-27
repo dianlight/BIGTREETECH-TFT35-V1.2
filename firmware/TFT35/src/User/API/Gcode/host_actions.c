@@ -5,7 +5,7 @@
 #define ACTION_PAUSE            "pause"                      // pause current print
 #define ACTION_CANCEL           "cancel"                     // cancel the current printer job ( a message is optional )
 //#define ACTION_DISCONNET        "disconnect"                 // disconnect
-//#define ACTION_PAUSED           "paused"                     // the job is paused        
+#define ACTION_PAUSED           "paused"                     // the job is paused        
 #define ACTION_RESUME           "resume"                     // resume the job
 //#define ACTION_OUT_OF_FILAMENT  "out_of_filament T%d"        // out of filement on %d extruder_id
 //#define ACTION_RESUMED          "resumed"                    // the job is resumed
@@ -36,6 +36,7 @@ bool parseHostAction(char *action)
     {
       if(!infoHost.printing && infoMenu.menu[infoMenu.cur] != menuPrinting && !infoHost.printing) {
           infoMenu.menu[++infoMenu.cur] = menuBeforePrinting;
+          infoFile.source=SERIAL;
           infoHost.printing=true;
       }
       int position, time;
@@ -51,7 +52,19 @@ bool parseHostAction(char *action)
     {
         popupDrawPage(&bottomSingleBtn ,(u8* )LABEL_READY, (u8 *)strstr(action,ACTION_STATUS) + sizeof(ACTION_STATUS), textSelect(LABEL_CONFIRM), NULL);    
         if(infoMenu.menu[infoMenu.cur] != menuPopup)
-        infoMenu.menu[++infoMenu.cur] = menuPopup;
+            infoMenu.menu[++infoMenu.cur] = menuPopup;
+        return true;
+    }
+    else if ( strstr(action,ACTION_PAUSED) != NULL )
+    {
+        setPrintPause(true);
+        return true;
+    }
+    else if ( strstr(action,ACTION_CANCEL) != NULL )
+    {
+        completePrinting();
+        if(infoMenu.menu[infoMenu.cur] != menuPrinting)
+            infoMenu.cur--;
         return true;
     }
     return false;
@@ -59,16 +72,16 @@ bool parseHostAction(char *action)
 
 void sendActionCommandPause(void)
 {
-    mustStoreCmd((u8 *)"M118 A1 "ACTION_PAUSE"\n");
+    mustStoreCmd("M118 A1 "ACTION_PAUSE"\n");
 }
 
 void sendActionCommandResume(void)
 {
-    mustStoreCmd((u8 *)"M118 A1 "ACTION_RESUME"\n");
+    mustStoreCmd("M118 A1 "ACTION_RESUME"\n");
 }
 
 void sendActionCommandCancel(void)
 {
-    mustStoreCmd((u8 *)"M118 A1 "ACTION_CANCEL"\n");
+    mustStoreCmd("M118 A1 "ACTION_CANCEL"\n");
 }
 

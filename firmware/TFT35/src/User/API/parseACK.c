@@ -78,7 +78,7 @@ void ackPopupInfo(const char *info)
 
 void parseACK(void)
 {
-  if(infoHost.rx_ok != true) return;      //not get response data
+//  if(infoHost.rx_ok != true) return;      //not get response data
   if(infoHost.connected == false)         //not connected to Marlin
   {
     if(!ack_seen(connectmagic)) return;
@@ -214,12 +214,16 @@ void parseACK(void)
 void parseACKml(void)
 {
   if(infoHost.rx_ok != true) return;      //not get response data
-  ack_rev_buf = strtok(ack_rev_buf_ml,"\n");
-  while(ack_rev_buf != NULL)
+  infoHost.rx_ok=false;
+  char *saveaddrs;
+  const char linefeed[]="\n"; 
+  ack_rev_buf = strtok_r(ack_rev_buf_ml,linefeed,&saveaddrs);
+  do 
   {
     parseACK();
-    ack_rev_buf = strtok(NULL,"\n");
+    ack_rev_buf = strtok_r(NULL,linefeed,&saveaddrs);
+  //  loopProcess();
   }
-  infoHost.rx_ok=false;
+  while(ack_rev_buf != NULL);
   USART1_DMAReEnable();
 }
