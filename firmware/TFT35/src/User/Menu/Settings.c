@@ -8,7 +8,7 @@ SETTINGS infoSettings;
 #elif HARDWARE_VERSION == V1_1
   #define VER  "V1.1"
 #elif HARDWARE_VERSION == V1_2
-#define VER "V1.2"
+  #define VER  "V1.2"
 #endif
 
 #ifdef MARLIN2_AUTOCONFIG
@@ -83,13 +83,13 @@ bool displayCheck()
   if (ok)
   {
     strcat(checks, " OK");
-  }
+     }
   else
   {
     strcat(checks, " ERROR");
     GUI_DrawQRCode(LCD_WIDTH, LCD_HEIGHT, -1, QR_TYPE, (u8 *)errorMessage);
 //    GUI_DrawQRCode(0, LCD_HEIGHT, -1, QR_TYPE, (u8 *)errorMessage);
-  }
+   }
   GUI_ClearRect(0, 50 + 120, LCD_WIDTH, STARTLINE + 120 + BYTE_HEIGHT);
   GUI_DispString(10, 50 + 120, (u8 *)checks, 0);
    GUI_SetColor(FK_COLOR);
@@ -129,7 +129,7 @@ void menuInfo(void)
  #endif
 #ifdef MARLIN2_AUTOCONFIG
   GUI_DispString(10, STARTLINE + 120, (u8 *)"Printer Fw : " SHORT_BUILD_VERSION, 0);
-#endif
+ #endif
 #ifdef FIRMWARE_SOURCE
   GUI_DrawQRCode(LCD_WIDTH, LCD_HEIGHT, -1, QR_TYPE, (u8 *)STRINGIFY(FIRMWARE_SOURCE));
 #endif // FIRMWARE_SOURCE
@@ -149,7 +149,7 @@ void menuInfo(void)
   {
    #if defined MACHINE_UUID
     Scroll_DispString(&uuidScroll, 1, LEFT);
-#endif
+   #endif 
 #ifdef FIRMWARE_SOURCE
     Scroll_DispString(&urlScroll, 1, LEFT);
    #endif 
@@ -209,7 +209,7 @@ void menuCheck(void)
       checkOK(CHECK_M155_AUTOREPORT);
     else
       checkError(CHECK_M155_AUTOREPORT);
-#endif
+  #endif
 #ifdef M118_ACTION_COMMAND
     if (myCap->PROMPT_SUPPORT)
       checkOK(CHECK_PROMPT_SUPPORT);
