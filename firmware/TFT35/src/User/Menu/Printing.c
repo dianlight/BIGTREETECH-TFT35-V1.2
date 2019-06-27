@@ -175,11 +175,12 @@ void menuBeforePrinting(void)
       startGcodeExecute();
       break;
     case SERIAL: // GCode from another serial or USB
-      infoPrinting.size  = size;
+      infoPrinting.size  = 100;
+      infoPrinting.cur = 0;
       infoPrinting.printing = true;
       printSetUpdateWaiting(true);
       infoHost.printing=true; 
-    break;  
+      break;  
   }
   infoMenu.menu[infoMenu.cur] = menuPrinting;
 }
@@ -441,6 +442,8 @@ void endPrinting(void)
     case TFT_SD:
       f_close(&infoPrinting.file);	
       break;
+    case SERIAL:
+      break;  
   }
   powerFailedDelete();  
   endGcodeExecute();		
