@@ -3,7 +3,7 @@
 
 #define DMA_TRANS_LEN  ACK_MAX_SIZE
 
-char *dma_mem_buf = ack_rev_buf;
+char *dma_mem_buf = ack_rev_buf_ml;
 
 void USART1_Config(u32 baud)
 {

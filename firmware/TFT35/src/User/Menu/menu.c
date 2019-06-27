@@ -200,7 +200,7 @@ void loopProcess (void)
   //    parseQueueCmd();                
   sendQueueCmd();                     //处理并发送队列中的Gcode命令
   
-  parseACK();                         //解析接收的从机应答信息
+  parseACKml();                         //解析接收的从机应答信息
 
 #ifndef M155_AUTOREPORT
   loopCheckHeater();			            //温度相关的设置

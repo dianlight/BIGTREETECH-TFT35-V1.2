@@ -38,6 +38,7 @@
 #include "myfatfs.h"
 #include "Gcode/gcode.h"
 #include "Gcode/mygcodefs.h"
+#include "Gcode/host_actions.h"
 #include "flashStore.h"
 #include "parseACK.h"
 

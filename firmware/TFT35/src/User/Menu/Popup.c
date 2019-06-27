@@ -90,18 +90,14 @@ void popupDrawQRCode(BUTTON *btn, const u8 *title, const u8 *context, const u8 *
   qrcode_initText(&qrcode, qrcodeData, 3, 0,(char *)context);
 
 
-  int scale = 2;
-  int x_pos = 50;
-  int y_pos = 50;
+  int scale = 3;
+  int x_pos = 100;
+  int y_pos = 100;
   for (int y = 0; y < qrcode.size; y++) {
     for (int x = 0; x < qrcode.size; x++) {
         if (qrcode_getModule(&qrcode, x, y)) 
         {
-//            GUI_SetColor(FK_COLOR);
-//            GUI_DrawPoint(x+10,y+10);
             GUI_FillRectColor( (x*scale)+x_pos,(y*scale)+y_pos,(x*scale)+x_pos+scale,(y*scale)+y_pos+scale,WHITE);
-//        } else {
-//            Serial.print("  ");
         }
   }
 

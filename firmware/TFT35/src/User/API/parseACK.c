@@ -1,6 +1,9 @@
 #include "parseACK.h"
+#include "logger.h"
+#include <ctype.h>
 
-char ack_rev_buf[ACK_MAX_SIZE];
+char ack_rev_buf_ml[ACK_MAX_SIZE];
+char *ack_rev_buf;
 static u16 ack_index=0;
 
 static char ack_seen(const char *str)
@@ -18,6 +21,23 @@ static char ack_seen(const char *str)
   }
   return false;
 }
+
+static char ack_seen_ic(const char *str)
+{
+  u16 i;	
+  for(ack_index=0; ack_index<ACK_MAX_SIZE && ack_rev_buf[ack_index]!=0; ack_index++)
+  {
+    for(i=0; str[i]!=0 && ack_rev_buf[ack_index+i]!=0 && tolower(ack_rev_buf[ack_index+i])==tolower(str[i]); i++)
+    {}
+    if(str[i]==0)
+    {
+      ack_index += i;      
+      return true;
+    }
+  }
+  return false;
+}
+
 static char ack_cmp(const char *str)
 {
   u16 i;
@@ -62,9 +82,13 @@ void parseACK(void)
   if(infoHost.rx_ok != true) return;      //not get response data
   if(infoHost.connected == false)         //not connected to Marlin
   {
-    if(!ack_seen(connectmagic))    goto parse_end;  //the first response should the M115 response"
+    if(!ack_seen(connectmagic)) return;
+    //   goto parse_end;  //the first response should the M115 response"
     infoHost.connected = true;
   }    
+
+  debugBar(ack_rev_buf);
+
 
   // GCode command response
   bool gcodeProcessed = false;
@@ -151,7 +175,7 @@ void parseACK(void)
     }
     else if(ack_seen(bsdprintingmagic))
     {
-      if(infoMenu.menu[infoMenu.cur] != menuPrinting && !infoHost.printing) {
+      if(infoHost.printing && infoMenu.menu[infoMenu.cur] != menuPrinting && !infoHost.printing) {
           infoMenu.menu[++infoMenu.cur] = menuPrinting;
           infoHost.printing=true;
       }
@@ -175,12 +199,30 @@ void parseACK(void)
     {
         ackPopupInfo(echomagic);
     }
+  #ifdef M118_ACTION_COMMAND
+    else if(ack_seen(commentmagic) && ack_seen_ic(actioncommandmagic))
+    {
+        parseHostAction(&ack_rev_buf[ack_index]);
+        ackPopupInfo("ACTION");
+    }
+  #endif
   }
   
-parse_end:
-  infoHost.rx_ok=false;
-  USART1_DMAReEnable();
+//parse_end:
+//  infoHost.rx_ok=false;
+//  USART1_DMAReEnable();
 }
 
 
-
+void parseACKml(void)
+{
+  if(infoHost.rx_ok != true) return;      //not get response data
+  ack_rev_buf = strtok(ack_rev_buf_ml,"\n");
+  while(ack_rev_buf != NULL)
+  {
+    parseACK();
+    ack_rev_buf = strtok(NULL,"\n");
+  }
+  infoHost.rx_ok=false;
+  USART1_DMAReEnable();
+}

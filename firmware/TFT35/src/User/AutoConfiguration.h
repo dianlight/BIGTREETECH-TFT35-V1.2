@@ -41,7 +41,7 @@
         #endif
 
         #if !defined AUTO_REPORT_SD_STATUS && defined M27_AUTOREPORT
-            #error "M27_AUTOREPORT Enabled but Marling config without AUTO_REPORT_SD_STATUS"
+            #error "M27_AUTOREPORT Enabled but Marlin config without AUTO_REPORT_SD_STATUS"
         #elif defined AUTO_REPORT_SD_STATUS && !defined M27_AUTOREPORT
             #define M27_AUTOREPORT
         #endif
@@ -53,15 +53,21 @@
         #endif
 
         #if !defined EXTENDED_CAPABILITIES_REPORT && defined RUNTIME_CONFIG_VALIDATE
-            #error "RUNTIME_CONFIG_VALIDATE Enabled but Marling config without EXTENDED_CAPABILITIES_REPORT"
+            #error "RUNTIME_CONFIG_VALIDATE Enabled but Marlin config without EXTENDED_CAPABILITIES_REPORT"
         #elif defined EXTENDED_CAPABILITIES_REPORT && !defined RUNTIME_CONFIG_VALIDATE
             #define RUNTIME_CONFIG_VALIDATE
         #endif
 
         #if !defined BABYSTEPPING && defined M290_BABYSTEPPING
-            #error "M290_BABYSTEPPING Enabled but Marling config without BABYSTEPPING"
+            #error "M290_BABYSTEPPING Enabled but Marlin config without BABYSTEPPING"
         #elif defined BABYSTEPPING && !defined M290_BABYSTEPPING
             #define M290_BABYSTEPPING
+        #endif
+
+        #if !defined BIGTREETECH_TFT35_LCD && defined M118_ACTION_COMMAND
+            #error "M118_ACTION_COMMAND Enabled but Marlin config without BIGTREETECH_TFT35_LCD"
+        #elif defined BIGTREETECH_TFT35_LCD && !defined M118_ACTION_COMMAND
+            #define M118_ACTION_COMMAND
         #endif
 
         

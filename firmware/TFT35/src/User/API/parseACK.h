@@ -11,12 +11,16 @@ static const char busymagic[]         = "busy:";
 static const char bsdprintingmagic[]   = "SD printing byte";
 static const char bsdnoprintingmagic[] = "Not SD printing";
 #endif
+#ifdef M118_ACTION_COMMAND
+static const char commentmagic[]       = "//";
+static const char actioncommandmagic[] = "action:";  // Marlin  
+#endif 
 
 
 #define ACK_MAX_SIZE 300
-extern char ack_rev_buf[ACK_MAX_SIZE];
+extern char ack_rev_buf_ml[ACK_MAX_SIZE];
 
-void parseACK(void);
+void parseACKml(void);
 
 #endif
 

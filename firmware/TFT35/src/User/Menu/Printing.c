@@ -61,6 +61,12 @@ void setPrintingTime(u32 RTtime)
     }
   }
 }
+
+void setABSPrintingTime(u32 time)
+{
+  infoPrinting.time = time;      
+}
+
 //锟斤拷锟矫达拷印锟侥硷拷锟斤拷锟杰达拷小
 void setPrintSize(u32 size)
 {
@@ -377,6 +383,7 @@ void menuPrinting(void)
         else
         {
           exitPrinting();
+          infoPrinting.printing = false;
           infoMenu.cur--;
         }					
         break;

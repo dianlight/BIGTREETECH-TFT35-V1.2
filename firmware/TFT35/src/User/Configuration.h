@@ -54,6 +54,9 @@
 // Use M155 to report temperature instead M105 Polling ( Requires AUTO_REPORT_TEMPERATURES in Configuration_adv.h )
 #define M155_AUTOREPORT
 
+// Support M118 Actions command 
+#define M118_ACTION_COMMAND
+
 // Use M115 with EXTENDED_CAPABILITIES_REPORT and other strategies to check the config at runtime.
 #define RUNTIME_CONFIG_VALIDATE
 
