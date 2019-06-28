@@ -12,6 +12,8 @@ char mountFS(void)
       return mountSDCard();
     case BOARD_SD:
       return mountGcodeSDCard();
+    case SERIAL:
+      return 1;  
   }
   return 0;
 }
@@ -54,6 +56,9 @@ void resetInfoFile(void)
     case BOARD_SD:
       memcpy(infoFile.title, "bSD:", 5);
       break;  
+    case SERIAL:
+      memcpy(infoFile.title, "AUX:", 5);
+      break;  
   }
 }
 
@@ -74,6 +79,8 @@ char scanPrintFiles(void)
       return scanPrintFilesFatFs();
     case BOARD_SD:
       return scanPrintFilesGcodeFs();
+    case SERIAL:
+      return 0; // TODO: Implement with marlin External_UI interface  
   }
   return 0;
 }

@@ -78,6 +78,12 @@ void setPrintCur(u32 cur)
   infoPrinting.cur = cur;
 }
 
+u32 getPrintCur(void)
+{
+  return infoPrinting.cur;
+}
+
+
 u8 getPrintProgress(void)
 {
   return infoPrinting.progress;
@@ -208,6 +214,7 @@ bool setPrintPause(bool is_pause)
       }
       break;
     case SERIAL:
+      infoPrinting.pause = is_pause;   
       if(is_pause){
         sendActionCommandPause();
       } else {
@@ -314,7 +321,10 @@ void printingDrawPage(void)
 {
   menuDrawPage(&printingItems);
   //	Scroll_CreatePara(&titleScroll, infoFile.title,&titleRect);  //
+  if(strlen(infoFile.title) > 4)
+  {
   GUI_DispLenString(titleRect.x0, titleRect.y0, getCurGcodeName(infoFile.title),1, (titleRect.x1 - titleRect.x0)/BYTE_WIDTH );
+  }
   GUI_DispString(120,160,(u8* )"T:",0);
   GUI_DispChar(120+BYTE_WIDTH*4,160,':',0);
   GUI_DispChar(120+BYTE_WIDTH*7,160,':',0);
@@ -443,6 +453,7 @@ void endPrinting(void)
       f_close(&infoPrinting.file);	
       break;
     case SERIAL:
+      infoPrinting.printing = false;
       break;  
   }
   powerFailedDelete();  

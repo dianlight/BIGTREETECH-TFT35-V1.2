@@ -8,7 +8,7 @@
 #define ACTION_PAUSED           "paused"                     // the job is paused        
 #define ACTION_RESUME           "resume"                     // resume the job
 //#define ACTION_OUT_OF_FILAMENT  "out_of_filament T%d"        // out of filement on %d extruder_id
-//#define ACTION_RESUMED          "resumed"                    // the job is resumed
+#define ACTION_RESUMED          "resumed"                    // the job is resumed
 
 // Dialog commands  (https://reprap.org/wiki/G-code#M876:_Dialog_handling)
 //#define ACTION_PROMPT_BEGIN  "prompt_begin %s"  // Starts the definition of a prompt dialog. <message> is the message to display to the user. (support: OctoPrint 1.3.9+ w/ enabled Action Command Prompt support plugin)
@@ -43,6 +43,10 @@ bool parseHostAction(char *action)
       if (sscanf(action,ACTION_PROGRESS_WF,&time,&position) != EOF)
       {
             setPrintSize(100);
+            if(getPrintCur() > 0)
+            {
+                setPrintPause(false);
+            }
             setPrintCur(position);
             setABSPrintingTime(time);
       }
@@ -60,11 +64,20 @@ bool parseHostAction(char *action)
         setPrintPause(true);
         return true;
     }
+    else if ( strstr(action,ACTION_RESUMED) != NULL )
+    {
+        setPrintPause(false);
+        return true;
+    }
     else if ( strstr(action,ACTION_CANCEL) != NULL )
     {
-        completePrinting();
-        if(infoMenu.menu[infoMenu.cur] != menuPrinting)
+        haltPrinting();
+        if(infoMenu.menu[infoMenu.cur] == menuPrinting)
             infoMenu.cur--;
+        return true;
+    }
+    else if ( strstr(action,ACTION_PAUSE) != NULL || strstr(action,ACTION_RESUME) != NULL )
+    {
         return true;
     }
     return false;
@@ -72,16 +85,16 @@ bool parseHostAction(char *action)
 
 void sendActionCommandPause(void)
 {
-    mustStoreCmd("M118 A1 "ACTION_PAUSE"\n");
+    mustStoreCmd("M118 A1 action:"ACTION_PAUSE"\n");
 }
 
 void sendActionCommandResume(void)
 {
-    mustStoreCmd("M118 A1 "ACTION_RESUME"\n");
+    mustStoreCmd("M118 A1 action:"ACTION_RESUME"\n");
 }
 
 void sendActionCommandCancel(void)
 {
-    mustStoreCmd("M118 A1 "ACTION_CANCEL"\n");
+    mustStoreCmd("M118 A1 action:"ACTION_CANCEL"\n");
 }
 
