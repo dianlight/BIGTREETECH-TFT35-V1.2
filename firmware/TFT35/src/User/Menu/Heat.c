@@ -86,7 +86,9 @@ bool heatHasWaiting(void)
   for(i = BED; i < HEATER_NUM; i++)
   {
     if(heater.T[i].waiting == true)
-    return true;
+    {
+      return true;
+    }
   }
   return false;
 }
@@ -289,6 +291,7 @@ void loopCheckHeater(void)
   u8 i;
   static u32  nowTime=0;
 
+  #ifndef M155_AUTOREPORT
   do
   {  /* 锟斤拷时锟斤拷锟斤拷M105锟斤拷询锟铰讹拷	*/
     if(update_waiting == true)                {nowTime=OS_GetTime();break;}
@@ -299,6 +302,7 @@ void loopCheckHeater(void)
     nowTime=OS_GetTime();
     update_waiting=true;
   }while(0);
+  #endif
 
   /* 锟斤拷询锟斤拷要锟饺达拷锟铰讹拷锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷锟斤拷锟角凤拷锏斤拷瓒拷露锟� */
   for(i=0; i<HEATER_NUM; i++)
@@ -318,9 +322,6 @@ void loopCheckHeater(void)
 
     if(infoMenu.menu[infoMenu.cur] == menuHeat)                         break;
     update_time=300;
-#ifdef M155_AUTOREPORT
-    async_M155(update_time / 100);
-#endif     
   }
 }
 

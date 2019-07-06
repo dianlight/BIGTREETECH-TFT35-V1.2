@@ -1,7 +1,7 @@
 #include "parseACK.h"
 #include <ctype.h>
+#include "logger.h"
 
-char ack_rev_buf_ml[ACK_MAX_SIZE];
 char *ack_rev_buf;
 static u16 ack_index=0;
 
@@ -21,6 +21,7 @@ static char ack_seen(const char *str)
   return false;
 }
 
+
 static char ack_seen_ic(const char *str)
 {
   u16 i;	
@@ -36,6 +37,7 @@ static char ack_seen_ic(const char *str)
   }
   return false;
 }
+
 
 static char ack_cmp(const char *str)
 {
@@ -81,8 +83,7 @@ void parseACK(void)
 //  if(infoHost.rx_ok != true) return;      //not get response data
   if(infoHost.connected == false)         //not connected to Marlin
   {
-    if(!ack_seen(connectmagic)) return;
-    //   goto parse_end;  //the first response should the M115 response"
+    if(!ack_seen(connectmagic) || !ack_seen("ok")) return;
     infoHost.connected = true;
   }    
 
@@ -96,10 +97,9 @@ void parseACK(void)
   }
   if(requestCommandInfo.inResponse)
   {
-    if(strlen(requestCommandInfo.cmd_rev_buf)+strlen(ack_rev_buf) < CMD_MAX_REV)
+    if(strlen(requestCommandInfo.cmd_rev_buf)+strlen(ack_rev_buf) < ACK_MAX_LINE)
     {
-        strcat(requestCommandInfo.cmd_rev_buf,ack_rev_buf);
-        strcat(requestCommandInfo.cmd_rev_buf,"\n");
+        requestCommandInfo.cmd_rev_buf[requestCommandInfo.cmd_rev_buf_pos++]=ack_rev_buf;
     }
     else 
     {
@@ -131,15 +131,20 @@ void parseACK(void)
   }
   // End
 
-  if(ack_cmp("ok\r") || ack_cmp("ok"))
+  debugfixed(11,"HW:%d %.7s", infoHost.wait,ack_rev_buf);
+
+
+  if(ack_cmp("ok\r\n") || ack_cmp("ok\n"))
   {
     infoHost.wait = false;	
+    debugfixed(12,"-New HW:%d Bw:%d Tw:%d", infoHost.wait, heatGetIsWaiting(BED), heatGetIsWaiting(0));
   }
   else
   {
     if(ack_seen("ok"))
     {
       infoHost.wait=false;
+      debugfixed(12,"+New HW:%d Bw:%d Tw:%d", infoHost.wait, heatGetIsWaiting(BED), heatGetIsWaiting(0));
     }					
     if(ack_seen("T:")) 
     {
@@ -203,27 +208,18 @@ void parseACK(void)
           ackPopupInfo("Unknown ACTION");
     }
   #endif
-  }
-  
-//parse_end:
-//  infoHost.rx_ok=false;
-//  USART1_DMAReEnable();
+  }  
 }
 
 
 void parseACKml(void)
 {
-  if(infoHost.rx_ok != true) return;      //not get response data
-  infoHost.rx_ok=false;
-  char *saveaddrs;
-  const char linefeed[]="\n"; 
-  ack_rev_buf = strtok_r(ack_rev_buf_ml,linefeed,&saveaddrs);
-  do 
+  ack_rev_buf = USART1_ReadLn();
+  while(ack_rev_buf != NULL)
   {
     parseACK();
-    ack_rev_buf = strtok_r(NULL,linefeed,&saveaddrs);
-  //  loopProcess();
+    loopProcess();
+    ack_rev_buf = USART1_ReadLn();
   }
-  while(ack_rev_buf != NULL);
   USART1_DMAReEnable();
 }

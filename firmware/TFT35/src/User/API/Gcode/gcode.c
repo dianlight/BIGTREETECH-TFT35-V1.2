@@ -20,7 +20,8 @@ bool requestHasTimeOut(int rtimeout)
 
 void resetRequestCommandInfo(void) 
 {
-  memset(requestCommandInfo.cmd_rev_buf,0,CMD_MAX_REV);
+  memset(requestCommandInfo.cmd_rev_buf,0,sizeof requestCommandInfo.cmd_rev_buf);
+  requestCommandInfo.cmd_rev_buf_pos=0;
   requestCommandInfo.inWaitResponse = true;
   requestCommandInfo.inResponse = false;
   requestCommandInfo.done = false;
@@ -94,8 +95,8 @@ bool request_M21(void)
 {
   strcpy(requestCommandInfo.command,"M21\n");
   strcpy(requestCommandInfo.startMagic,echomagic);
-  strcpy(requestCommandInfo.stopMagic,"\n");
-  strcpy(requestCommandInfo.errorMagic,"Error");
+  strcpy(requestCommandInfo.stopMagic,"SD card ok");
+  strcpy(requestCommandInfo.errorMagic,"SD init fail");
 
   resetRequestCommandInfo();
   mustStoreCmd(requestCommandInfo.command);
@@ -106,7 +107,7 @@ bool request_M21(void)
     loopProcess();
   }
   // Check reponse
-  if(strstr(requestCommandInfo.cmd_rev_buf,echomagic) != NULL && strstr(requestCommandInfo.cmd_rev_buf,"SD card ok") != NULL){
+  if(!requestCommandInfo.inError){
         return true;
   } else {
         return false;            
@@ -127,7 +128,7 @@ PI3MK2~1.GCO 11081207
 /YEST~1/PI3MK2~2.GCO 11081207
 End file list
 */
-char *request_M20(void)
+char **request_M20(void)
 {
   strcpy(requestCommandInfo.command,"M20\n");
   strcpy(requestCommandInfo.startMagic,"Begin file list");
@@ -174,7 +175,15 @@ long request_M23(char *filename)
   resumeAutoreports();
   // Find file size and report its.
   char *ptr;
-  return strtol(strstr(requestCommandInfo.cmd_rev_buf,"Size:")+5, &ptr, 10);
+  for(int i=0; i < requestCommandInfo.cmd_rev_buf_pos;i++)
+  {
+    char *pos = strstr(requestCommandInfo.cmd_rev_buf[i],"Size:");
+    if(pos != NULL)
+    {
+      return strtol(pos+5, &ptr, 10);
+    } 
+  }
+  return -1;
 }
 
 /**
@@ -185,9 +194,7 @@ bool request_M24(int pos)
   if(pos == 0){
       mustStoreCmd("M24\n");
   } else {
-      char command[100];
-      sprintf(command, "M24 S%d\n",pos);
-      mustStoreCmd(command);
+      mustStoreCmd("M24 S%d\n",pos);
   }
   return true;
 }
@@ -218,9 +225,7 @@ bool request_M27(int seconds)
 {
   if(seconds != 0)
      autoreportTimes[AUTOREPORT_M27]=seconds;
-  char command[10];
-  sprintf(command, "M27 S%d\n",seconds);
-  mustStoreCmd(command);
+  mustStoreCmd("M27 S%d\n",seconds);
   return true;
 }
 
@@ -231,9 +236,7 @@ bool async_M155(int seconds)
 {
   if(seconds != 0)
       autoreportTimes[AUTOREPORT_M155]=seconds;
-  char command[15];
-  sprintf(command, "M155 S%d\n",seconds);
-  return storeCmd(command);
+  return storeCmd("M155 S%d\n",seconds);
 }
 
 /**

@@ -1,9 +1,13 @@
 #include "usart.h"
 
 
-#define DMA_TRANS_LEN  ACK_MAX_SIZE
+#define DMA_TRANS_LEN  ACK_MAX_SIZE*ACK_MAX_LINE
+#define LINE_FEED "\n"
+static char dma_mem_buf[DMA_TRANS_LEN]; 
+static char incompleteLine[ACK_MAX_SIZE];
+static char ack_rev_buf[ACK_MAX_LINE][ACK_MAX_SIZE];
+static u8 ack_read_line, ack_write_line;
 
-char *dma_mem_buf = ack_rev_buf_ml;
 
 void USART1_Config(u32 baud)
 {
@@ -16,7 +20,7 @@ void USART1_Config(u32 baud)
   RCC->APB2ENR |= 1<<14; //���� USART1 ʱ��
 
   GPIOA->CRH &= 0xFFFFF00F;
-  GPIOA->CRH |= 0x000008B0;// PA9 �������   PA10��������
+  GPIOA->CRH |= 0x000008B0;// PA9 �������?   PA10��������
 
   //�����ж�ͨ���Լ����ȼ�
   NVIC_InitStructure.NVIC_IRQChannel=USART1_IRQn;
@@ -29,15 +33,15 @@ void USART1_Config(u32 baud)
   baud_brr = (u32)baud_div<<4;
   baud_brr += (u8)((baud_div-(u32)baud_div)*16 + 0.5);
   USART1->BRR = baud_brr;           // ����������	 
-  USART1->SR  &= ~(1<<4);           //��������ж�
+  USART1->SR  &= ~(1<<4);           //��������ж�?
   USART1->CR1 |=0X201C;  	         //ʹ��USART1. ʹ�ܿ����ж� 1λֹͣ,��У��λ.
   USART1->CR3 |= 1<<6;	           //ʹ�ܴ��ڽ���DMA	
 
-  DMA1_Channel5->CPAR = (u32)(&USART1->DR);		//�����ַ
-  DMA1_Channel5->CMAR = (u32) dma_mem_buf;			//Ŀ���ַ
+  DMA1_Channel5->CPAR = (u32)(&USART1->DR);		//������?
+  DMA1_Channel5->CMAR = (u32) dma_mem_buf;			//Ŀ����?
   DMA1_Channel5->CNDTR = DMA_TRANS_LEN;         //����������	
   DMA1_Channel5->CCR = 0X00000000;	//��λ
-  DMA1_Channel5->CCR |= 3<<12;   //11��ͨ�����ȼ����
+  DMA1_Channel5->CCR |= 3<<12;   //11��ͨ�����ȼ����?
   DMA1_Channel5->CCR |= 1<<7;    //1��ִ�д洢����ַ��������
   DMA1_Channel5->CCR |= 1<<0;    //ʹ��DMA		
 }
@@ -61,19 +65,43 @@ void USART1_IRQHandler(void)
   if((USART1->SR & (1<<4))!=0)
   {
     USART1->SR = ~(1<<4);
-    USART1->DR;   //DMA+���ڿ����ж�  �жϷ������������һ�� �����ݼĴ�������Ȼ���������֮�������
+    USART1->DR;   //DMA+���ڿ����ж�  �жϷ������������һ��? �����ݼĴ�������Ȼ���������֮�������
 
     rx_len = DMA_TRANS_LEN - DMA1_Channel5->CNDTR;
 
-    if(dma_mem_buf[rx_len-1]=='\n')
+    u16 stop=0, start=0;
+    for(; stop < rx_len; stop++ )
     {
-      infoHost.rx_ok=true;
+      if(ack_write_line == ACK_MAX_LINE)ack_write_line=0;
+      if(dma_mem_buf[stop] == '\n'){
+        memset(ack_rev_buf[ack_write_line],0,ACK_MAX_SIZE);
+        if(incompleteLine[0] != 0)
+        {
+          strcpy(ack_rev_buf[ack_write_line],incompleteLine);
+          memcpy(ack_rev_buf[ack_write_line++]+strlen(incompleteLine),&dma_mem_buf[start],stop-start+1);
+          memset(&incompleteLine,0,ACK_MAX_SIZE);
+        }
+        else
+        {
+          memcpy(ack_rev_buf[ack_write_line++],&dma_mem_buf[start],stop-start+1);
+        }
+        start=stop;
+      }
     }
-    else if(rx_len > DMA_TRANS_LEN-5)
+
+    if(start != stop)
     {
-      infoHost.rx_ok=true;
+      // Not completed line ( save for next cicle)
+        memcpy(incompleteLine,&dma_mem_buf[start],stop-start);
     }
   }
+}
+
+char *USART1_ReadLn(void)
+{
+  if ( ack_read_line == ACK_MAX_LINE) ack_read_line=0;
+  if ( ack_read_line == ack_write_line) return NULL;
+  return ack_rev_buf[ack_read_line++];
 }
 
 void USART1_Puts(char *s )
@@ -89,7 +117,7 @@ void USART1_Puts(char *s )
 //重定义fputc函数 
 int fputc(int ch, FILE *f)
 {      
-	while((USART1->SR&0X40)==0);//循环发送,直到发送完毕   
+	while((USART1->SR&0X40)==0);//循环发�?,直到发送完�?   
     USART1->DR = (u8) ch;      
 	return ch;
 }

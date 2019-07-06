@@ -1,6 +1,9 @@
 #ifndef _PARSEACK_H_
 #define _PARSEACK_H_
 
+#define ACK_MAX_SIZE 250
+#define ACK_MAX_LINE 40
+
 #include "includes.h"
 
 static const char connectmagic[]      = "FIRMWARE_NAME";
@@ -17,8 +20,6 @@ static const char actioncommandmagic[] = "action:";  // Marlin
 #endif 
 
 
-#define ACK_MAX_SIZE 3000 // Need a big buffer because some commands returns big elements
-extern char ack_rev_buf_ml[ACK_MAX_SIZE];
 
 void parseACKml(void);
 

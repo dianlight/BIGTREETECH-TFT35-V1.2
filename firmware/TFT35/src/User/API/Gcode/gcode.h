@@ -2,10 +2,10 @@
 #define _GCODE_H_
 #include "stdbool.h"
 #include "interfaceCmd.h"
+#include "parseACK.h"
 
 #define CMD_MAX_SIZE    100
-#define CMD_MAX_REV     5000
-#define CMD_ASYNC       1
+#define CMD_ASYNC       1                      // Number of Async procedures 
 
 typedef struct {
     char command[CMD_MAX_CHAR];                // The command sent to printer
@@ -16,7 +16,8 @@ typedef struct {
     bool inWaitResponse;                       // true if waiting for start magic
     bool done;                                 // true if command is executed and response is received
     bool inError;                              // true if error response
-    char cmd_rev_buf[CMD_MAX_REV];             // buffer where store the command response
+    char *cmd_rev_buf[ACK_MAX_LINE];           // buffer where store the command response (only ponter to line)
+    u8 cmd_rev_buf_pos;                        // current position in cmd_rev_buf list
     void (*asyncCallback[CMD_ASYNC])(char *);  // list of function pointer for async gecode functions;
 } REQUEST_COMMAND_INFO;
 
@@ -28,7 +29,7 @@ void closeRequestCommandInfo(bool isOK);
 void loopAutoreportRefresh(void);
 
 bool request_M21(void);
-char *request_M20(void);
+char **request_M20(void);
 bool request_M25(void);
 bool request_M27(int seconds);
 bool request_M524(void);

@@ -16,9 +16,6 @@ echo:SD card ok
   return request_M21();
 }
 
-//static uint32_t date=0;
-//static FILINFO  finfo;
-//static uint16_t len = 0;
 /*
 SENDING:M20
 Begin file list
@@ -37,12 +34,11 @@ bool scanPrintFilesGcodeFs(void)
 {
   clearInfoFile();
 
-  char *data = request_M20();
+  char **data = request_M20();
 
-  const char s[2] = "\n";
-  char *line = strtok(data, s);
-  for (;line != NULL;line = strtok(NULL, s))
+  for(int pos=0; data[pos][0]!= 0;pos++)
   {
+    char *line=data[pos];
     if( strcmp(line,"Begin file list") == 0 || strcmp(line,"End file list") == 0 || strcmp(line,"ok") == 0)continue; // Start and Stop tag
     if( strlen(line) < strlen(infoFile.title)-4) continue; // No path line exclude
     if( strlen(infoFile.title) > 4 && strstr(line,infoFile.title+4) == NULL) continue; // No current directory
@@ -96,7 +92,9 @@ bool scanPrintFilesGcodeFs(void)
 
       }
     }
+ 
   }
+
   return true;
 }
 

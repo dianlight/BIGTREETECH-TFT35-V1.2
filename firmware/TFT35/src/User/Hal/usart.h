@@ -8,6 +8,7 @@ void USART1_DMAReEnable(void);
     
 void USART1_Config(u32 baud);
 void USART1_Puts(char *s);
+char *USART1_ReadLn(void);
 
 #endif 
 
