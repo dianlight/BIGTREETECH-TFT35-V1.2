@@ -97,7 +97,7 @@ void parseACK(void)
   }
   if(requestCommandInfo.inResponse)
   {
-    if(strlen(requestCommandInfo.cmd_rev_buf)+strlen(ack_rev_buf) < ACK_MAX_LINE)
+    if(requestCommandInfo.cmd_rev_buf_pos < ACK_MAX_LINE)
     {
         requestCommandInfo.cmd_rev_buf[requestCommandInfo.cmd_rev_buf_pos++]=ack_rev_buf;
     }

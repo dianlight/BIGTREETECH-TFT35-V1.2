@@ -1,6 +1,6 @@
 #include "GUI.h"
 
-#include "qrcode.h"
+#include <qrcode.h>
 #undef bool
 #include "includes.h"
 
