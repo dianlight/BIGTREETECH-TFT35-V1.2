@@ -64,6 +64,9 @@
 // Use M115 with EXTENDED_CAPABILITIES_REPORT and other strategies to check the config at runtime.
 #define RUNTIME_CONFIG_VALIDATE
 
+// User QRCode for extended reporting ( errors, info etch )
+#define USE_QRCODE
+
 //don't modify
 #define V1_0  0
 #define V1_1  1

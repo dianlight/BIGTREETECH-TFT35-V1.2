@@ -1,7 +1,10 @@
 #include "GUI.h"
+#include "Configuration.h"
 
-#include <qrcode.h>
-#undef bool
+#ifdef USE_QRCODE
+  #include <qrcode.h>
+  #undef bool
+#endif // USE_QRCODE
 #include "includes.h"
 
 uint16_t COLOR = FK_COLOR;
@@ -970,6 +973,7 @@ void GUI_DrawWindow(const WINDOW *window, const uint8_t *title, const uint8_t *i
   GUI_SetColor(nowFontColor);
 }
 
+#ifdef USE_QRCODE
 // see https://github.com/ricmoo/QRCode
 void GUI_DrawQRCode(int16_t x_pos, int16_t y_pos, int scale,int type, const uint8_t *message)
 {
@@ -996,3 +1000,4 @@ void GUI_DrawQRCode(int16_t x_pos, int16_t y_pos, int scale,int type, const uint
     }
   }
 }
+#endif // USE_QRCODE
