@@ -1,6 +1,6 @@
 #include "parseACK.h"
 #include <ctype.h>
-#include "logger.h"
+//#include "logger.h"
 
 char *ack_rev_buf;
 static u16 ack_index=0;
@@ -83,7 +83,7 @@ void parseACK(void)
 //  if(infoHost.rx_ok != true) return;      //not get response data
   if(infoHost.connected == false)         //not connected to Marlin
   {
-    if(!ack_seen(connectmagic) || !ack_seen("ok")) return;
+    if(!ack_seen(connectmagic) && !ack_seen("ok")) return;
     infoHost.connected = true;
   }    
 
@@ -131,20 +131,20 @@ void parseACK(void)
   }
   // End
 
-  debugfixed(11,"HW:%d %.7s", infoHost.wait,ack_rev_buf);
+  //debugfixed(11,"W%x %.30s", infoHost.wait,ack_rev_buf);
 
 
   if(ack_cmp("ok\r\n") || ack_cmp("ok\n"))
   {
     infoHost.wait = false;	
-    debugfixed(12,"-New HW:%d Bw:%d Tw:%d", infoHost.wait, heatGetIsWaiting(BED), heatGetIsWaiting(0));
+   // debugfixed(12,"-New HW:%d Bw:%d Tw:%d", infoHost.wait, heatGetIsWaiting(BED), heatGetIsWaiting(0));
   }
   else
   {
     if(ack_seen("ok"))
     {
       infoHost.wait=false;
-      debugfixed(12,"+New HW:%d Bw:%d Tw:%d", infoHost.wait, heatGetIsWaiting(BED), heatGetIsWaiting(0));
+     // debugfixed(12,"+New HW:%d Bw:%d Tw:%d", infoHost.wait, heatGetIsWaiting(BED), heatGetIsWaiting(0));
     }					
     if(ack_seen("T:")) 
     {
@@ -165,7 +165,7 @@ void parseACK(void)
       heatSetCurrentTemp(BED,ack_value()+0.5);
       heatSetTargetTemp(BED, ack_second_value()+0.5);
     }
-    else if(infoHost.connected && ack_seen(echomagic) && ack_seen(busymagic) && ack_seen("processing"))
+    else if(ack_seen(busymagic) && ack_seen("processing"))
     {
       busyIndicator(STATUS_BUSY);
     }
@@ -221,5 +221,5 @@ void parseACKml(void)
     loopProcess();
     ack_rev_buf = USART1_ReadLn();
   }
-  USART1_DMAReEnable();
+//  USART1_DMAReEnable();
 }

@@ -1,5 +1,6 @@
 #include "mygcodefs.h"
 #include "includes.h"
+//#include "logger.h"
 
 /* 
 */
@@ -36,10 +37,11 @@ bool scanPrintFilesGcodeFs(void)
 
   char **data = request_M20();
 
-  for(int pos=0; data[pos][0]!= 0;pos++)
+  for(int pos=1; data[pos]!= NULL;pos++)
   {
+  //  debugfixed(1,"W%d %.30s",pos, data[pos]);
     char *line=data[pos];
-    if( strcmp(line,"Begin file list") == 0 || strcmp(line,"End file list") == 0 || strcmp(line,"ok") == 0)continue; // Start and Stop tag
+    if( strstr(line,"End file list") != NULL )continue; // Stop tag
     if( strlen(line) < strlen(infoFile.title)-4) continue; // No path line exclude
     if( strlen(infoFile.title) > 4 && strstr(line,infoFile.title+4) == NULL) continue; // No current directory
 

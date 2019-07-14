@@ -1,8 +1,8 @@
 #ifndef _PARSEACK_H_
 #define _PARSEACK_H_
 
-#define ACK_MAX_SIZE 250
-#define ACK_MAX_LINE 40
+#define ACK_MAX_SIZE 256        // Need to be Power of 2
+#define ACK_MAX_LINE 32         // Need to be Power of 2
 
 #include "includes.h"
 

@@ -87,8 +87,9 @@ bool displayCheck()
   else
   {
     strcat(checks, " ERROR");
+    #ifdef USE_QRCODE
     GUI_DrawQRCode(LCD_WIDTH, LCD_HEIGHT, -1, QR_TYPE, (u8 *)errorMessage);
-//    GUI_DrawQRCode(0, LCD_HEIGHT, -1, QR_TYPE, (u8 *)errorMessage);
+    #endif
    }
   GUI_ClearRect(0, 50 + 120, LCD_WIDTH, STARTLINE + 120 + BYTE_HEIGHT);
   GUI_DispString(10, 50 + 120, (u8 *)checks, 0);
@@ -130,7 +131,7 @@ void menuInfo(void)
 #ifdef MARLIN2_AUTOCONFIG
   GUI_DispString(10, STARTLINE + 120, (u8 *)"Printer Fw : " SHORT_BUILD_VERSION, 0);
  #endif
-#ifdef FIRMWARE_SOURCE
+#if defined FIRMWARE_SOURCE && defined USE_QRCODE
   GUI_DrawQRCode(LCD_WIDTH, LCD_HEIGHT, -1, QR_TYPE, (u8 *)STRINGIFY(FIRMWARE_SOURCE));
 #endif // FIRMWARE_SOURCE
  

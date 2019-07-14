@@ -20,7 +20,7 @@ bool requestHasTimeOut(int rtimeout)
 
 void resetRequestCommandInfo(void) 
 {
-  memset(requestCommandInfo.cmd_rev_buf,0,sizeof requestCommandInfo.cmd_rev_buf);
+  memset(requestCommandInfo.cmd_rev_buf,0,sizeof(requestCommandInfo.cmd_rev_buf));
   requestCommandInfo.cmd_rev_buf_pos=0;
   requestCommandInfo.inWaitResponse = true;
   requestCommandInfo.inResponse = false;
