@@ -27,7 +27,7 @@
 #define ACTION_START         "start"                        // Print start 
 #define ACTION_PROGRESS      "progress"                     // Change printing progress (seconds, percent)
 #define ACTION_PROGRESS_WF   ACTION_PROGRESS" S%d P%d"      // Change printing progress (seconds, percent)
-#define ACTION_STATUS        "status"                       // Change status event ( message )
+#define ACTION_STATUS        "status"                       // Change status event ( message ) 
 
 
 bool parseHostAction(char *action)
@@ -54,9 +54,10 @@ bool parseHostAction(char *action)
     }
     else if ( strstr(action,ACTION_STATUS) != NULL )
     {
-        popupDrawPage(&bottomSingleBtn ,(u8* )LABEL_READY, (u8 *)strstr(action,ACTION_STATUS) + sizeof(ACTION_STATUS), textSelect(LABEL_CONFIRM), NULL);    
-        if(infoMenu.menu[infoMenu.cur] != menuPopup)
-            infoMenu.menu[++infoMenu.cur] = menuPopup;
+        GUI_SetColor(GREEN);
+        GUI_ClearRect(0,0,LCD_WIDTH,BYTE_HEIGHT);
+        GUI_DispStringInRect(0,0,LCD_WIDTH,BYTE_HEIGHT,(u8 *)action,0);
+        GUI_SetColor(FK_COLOR);
         return true;
     }
     else if ( strstr(action,ACTION_PAUSED) != NULL )
@@ -71,9 +72,16 @@ bool parseHostAction(char *action)
     }
     else if ( strstr(action,ACTION_CANCEL) != NULL )
     {
-        haltPrinting();
         if(infoMenu.menu[infoMenu.cur] == menuPrinting)
+        {
+            haltPrinting();
             infoMenu.cur--;
+        }
+        return true;
+    }
+    else if ( strstr(action,ACTION_MEDIA) != NULL )
+    {
+        // do nothing for now
         return true;
     }
     else if ( strstr(action,ACTION_PAUSE) != NULL || strstr(action,ACTION_RESUME) != NULL )

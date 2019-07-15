@@ -129,7 +129,7 @@ void menuInfo(void)
   Scroll_CreatePara(&uuidScroll, (u8 *)MACHINE_UUID, &uuidRect);
  #endif
 #ifdef MARLIN2_AUTOCONFIG
-  GUI_DispString(10, STARTLINE + 120, (u8 *)"Printer Fw : " SHORT_BUILD_VERSION, 0);
+  GUI_DispString(10, STARTLINE + 120, (u8 *)"Printer Fw : " MARLIN_VERSION, 0);
  #endif
 #if defined FIRMWARE_SOURCE && defined USE_QRCODE
   GUI_DrawQRCode(LCD_WIDTH, LCD_HEIGHT, -1, QR_TYPE, (u8 *)STRINGIFY(FIRMWARE_SOURCE));
@@ -167,7 +167,7 @@ void menuCheck(void)
   GUI_DispString(10, 50, (u8 *)"Board      : BIGTREETECH_TFT35_" VER, 0);
   GUI_DispString(10, 50 + 30, (u8 *)"Firmware   : " VER "." STRINGIFY(SOFTWARE_VERSION) " " __DATE__, 0);
  #ifdef MARLIN2_AUTOCONFIG
-  GUI_DispString(10, 50 + 60, (u8 *)"Printer Fw : " SHORT_BUILD_VERSION, 0);
+  GUI_DispString(10, 50 + 60, (u8 *)"Printer Fw : " MARLIN_VERSION " ", 0);
  #endif 
   GUI_DispString(10, 50 + 120, (u8 *)"Fw check   : (Pending....)", 0);
   M115_CAP *myCap = async_M115();
@@ -175,7 +175,7 @@ void menuCheck(void)
   if (myCap->lastUpdateTime != 0)
   {
   #ifdef MACHINE_UUID
-    if (strstr(myCap.UUID, MACHINE_UUID) == NULL)
+    if (strstr(myCap->_UUID, MACHINE_UUID) == NULL)
     {
       GUI_SetColor(RED);
       checkError(CHECK_UUID);
@@ -187,32 +187,32 @@ void menuCheck(void)
   #else
     GUI_DispString(10, 50 + 90, (u8 *)"Printer ID : ", 0);
     GUI_SetColor(FK_COLOR);
-    Scroll_CreatePara(&uuidScroll, (u8 *)myCap->UUID, &uuidRectC);
+    Scroll_CreatePara(&uuidScroll, (u8 *)myCap->_UUID, &uuidRectC);
   #endif
-    if (myCap->EXTRUDER_COUNT == EXTRUDER_NUM)
+    if (myCap->_EXTRUDER_COUNT == EXTRUDER_NUM)
       checkOK(CHECK_EXTRUDER_NUM);
     else
       checkError(CHECK_EXTRUDER_NUM);
   #ifdef M27_AUTOREPORT
-    if (myCap->AUTOREPORT_SD_STATUS)
+    if (myCap->_AUTOREPORT_SD_STATUS)
       checkOK(CHECK_M27_AUTOREPORT);
     else
       checkError(CHECK_M27_AUTOREPORT);
   #endif
   #ifdef ONBOARD_SD_SUPPORT
-    if (myCap->AUTOREPORT_SD_STATUS)
+    if (myCap->_AUTOREPORT_SD_STATUS)
       checkOK(CHECK_ONBOARD_SD_SUPPORT);
     else
       checkError(CHECK_ONBOARD_SD_SUPPORT);
   #endif
   #ifdef M155_AUTOREPORT
-    if (myCap->AUTOREPORT_TEMP)
+    if (myCap->_AUTOREPORT_TEMP)
       checkOK(CHECK_M155_AUTOREPORT);
     else
       checkError(CHECK_M155_AUTOREPORT);
   #endif
 #ifdef M118_ACTION_COMMAND
-    if (myCap->PROMPT_SUPPORT)
+    if (myCap->_PROMPT_SUPPORT)
       checkOK(CHECK_PROMPT_SUPPORT);
     else
       checkError(CHECK_PROMPT_SUPPORT);

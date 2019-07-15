@@ -10,7 +10,7 @@
  * NOTE: If MARLIN2_AUTOCONFIG is defined all config in this file is use only as default and the setting ( if exists or are derivable )
  * is based on referenced marlin config 
  */
-//#define MARLIN2_AUTOCONFIG        // if enabled the configuration is derived from Configuration.h and Configuration_adv.h 
+#define MARLIN2_AUTOCONFIG        // if enabled the configuration is derived from Configuration.h and Configuration_adv.h 
 #ifdef MARLIN2_AUTOCONFIG
   // The directory where marlin source are (git clone root)
   #define MARLIN2_HOME  /Users/ltarantino/Documents/3D Printer/Marlin Git/Merlin2.0

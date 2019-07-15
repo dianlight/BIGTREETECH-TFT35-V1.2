@@ -19,7 +19,7 @@
 
         #define HAS_DRIVER(T) ENABLED(T)   // BOGUS Value. All sub step driver configuration are fake
         #include STR(MARLIN2_HOME/Marlin/Configuration_adv.h)
-//        #include STR(MARLIN2_HOME/Marlin/src/inc/MarlinConfig.h)
+        #include STR(MARLIN2_HOME/Marlin/src/inc/Version.h)
         #undef MAX
         #undef MIN
         #undef ABS
@@ -69,6 +69,8 @@
         #elif defined BIGTREETECH_TFT35_LCD && !defined M118_ACTION_COMMAND
             #define M118_ACTION_COMMAND
         #endif
+
+        #define MARLIN_VERSION "Marlin/" SHORT_BUILD_VERSION
 
         
 

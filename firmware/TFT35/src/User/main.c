@@ -31,7 +31,8 @@ void Hardware_Config(void)
 
   u32 startUpTime = OS_GetTime();
   resetRequestCommandInfo();
-  heatSetUpdateTime(100);
+  async_M115();
+//  heatSetUpdateTime(100);
   while(OS_GetTime() - startUpTime < 300)  //Display 3s logo
   {                                                                                                                     
     loopProcess();	
