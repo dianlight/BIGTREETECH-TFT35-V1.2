@@ -1,3 +1,6 @@
+# ATTENTION!
+## This branch is not more mainteined because the forked source is not meinteined. Plese see the [Wiki ](https://github.com/dianlight/BIGTREETECH-TFT35-V1.2/wiki) for more information!
+
 # BIGTREETECH-TFT35-V1.2
 ### firmware
 The firmware folder contains the source code, project, icons and font files of the touch screen
